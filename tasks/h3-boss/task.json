@@ -1,0 +1,34 @@
+{
+  "order": 13,
+  "track": "hardcore",
+  "level": 3,
+  "emoji": "👹",
+  "minutes": 8,
+  "parMinutes": 5,
+  "title": { "zh": "Boss 战：上线前夜", "en": "Boss Fight: The Night Before Launch" },
+  "tagline": { "zh": "三个 bug，一个倒计时，没有提示", "en": "Three bugs, one countdown, no hints" },
+  "story": {
+    "zh": "零点秒杀开抢。现在是 23:55，测试红了一片：库存会超卖，优惠券算错钱，倒计时显示离谱。三个 bug 藏在三个文件里。",
+    "en": "The flash sale opens at midnight. It's 23:55 and the tests are red: inventory oversells, coupons miscalculate, the countdown is nonsense. Three bugs in three files."
+  },
+  "goal": {
+    "zh": "5 分钟内让测试全绿。除了开场那一句，这一关没有提示词按钮，怎么指挥 Qoder 你自己定。",
+    "en": "Get every test green within 5 minutes. Past the opening line there are no prompt buttons on this level: how you direct Qoder is up to you."
+  },
+  "openingPrompt": {
+    "zh": "紧急情况：5 分钟后上线。先跑 node --test 看看有多惨",
+    "en": "Emergency: we launch in 5 minutes. Run node --test first and show me how bad it is"
+  },
+  "steps": [
+    {
+      "hint": { "zh": "自己打字指挥。想省时间就一句话讲清楚：修什么、不许动什么、修完怎么验证。", "en": "Type your own orders. To save time, say it all in one go: what to fix, what not to touch, how to verify." }
+    },
+    {
+      "hint": { "zh": "Qoder 在 Auto 模式下自己跑命令、自己改文件，你只管盯着测试变绿。", "en": "In Auto mode Qoder runs commands and edits files on its own. Your job is to watch the tests go green." }
+    }
+  ],
+  "checks": [
+    { "type": "fileContains", "path": "test/sale.test.js", "pattern": "applyCoupons\\(100, \\{ percentOff: 20, minus: 10 \\}\\), 70", "label": { "zh": "测试文件没被动过手脚", "en": "The tests weren't tampered with" } },
+    { "type": "command", "cmd": "node", "args": ["--test"], "label": { "zh": "测试全绿（node --test）", "en": "All tests green (node --test)" } }
+  ]
+}

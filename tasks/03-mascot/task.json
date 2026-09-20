@@ -1,0 +1,63 @@
+{
+  "order": 3,
+  "level": 1,
+  "emoji": "🐶",
+  "minutes": 3,
+  "preview": "**/mascot*.png",
+  "title": {
+    "zh": "给团队画个吉祥物",
+    "en": "A Mascot for Your Team"
+  },
+  "tagline": {
+    "zh": "不会画画没关系，会说话就行",
+    "en": "Can't draw? Doesn't matter. You can talk"
+  },
+  "story": {
+    "zh": "团队要做文化衫，设计师排期排到了明年。Qoder CLI 内置了生图工具 ImageGen，在终端里说一句话就能出图。",
+    "en": "The team wants T-shirts and the designer is booked until next year. Qoder CLI ships with an image tool, ImageGen: say a sentence in the terminal and get a picture."
+  },
+  "goal": {
+    "zh": "得到一张吉祥物，在「预览」里看，不满意就让它改。",
+    "en": "End up with a mascot, look at it in the Preview tab, and ask for changes until you like it."
+  },
+  "openingPrompt": {
+    "zh": "用内置的 ImageGen 工具给我的团队画一个吉祥物：一只戴耳机的柴犬程序员，抱着笔记本电脑，扁平贴纸风，白色背景。图片名字用 mascot",
+    "en": "Use the built-in ImageGen tool to draw a mascot for my team: a shiba inu programmer wearing headphones and hugging a laptop, flat sticker style, white background. Name the image mascot"
+  },
+  "steps": [
+    {
+      "hint": {
+        "zh": "按回车发送。想换动物、换风格，发送前直接改提示词。出图后点「预览」。",
+        "en": "Press Enter. Want another animal or style? Edit the prompt before sending. Open Preview once the image is done."
+      }
+    },
+    {
+      "hint": {
+        "zh": "提个修改意见，像对设计师那样。",
+        "en": "Give feedback like you would to a designer."
+      },
+      "prompt": {
+        "zh": "再画一版，图片名字还用 mascot：同一只柴犬，但是它在凌晨三点改 bug，黑眼圈，桌上三杯咖啡",
+        "en": "Draw another version, still named mascot: the same shiba, but fixing a bug at 3am, dark circles under its eyes, three coffees on the desk"
+      }
+    }
+  ],
+  "checks": [
+    {
+      "type": "fileExists",
+      "glob": "**/mascot*.png",
+      "label": {
+        "zh": "吉祥物出生了",
+        "en": "The mascot is born"
+      }
+    },
+    {
+      "type": "transcriptContains",
+      "pattern": "\"name\":\"ImageGen\"",
+      "label": {
+        "zh": "是 ImageGen 画的",
+        "en": "ImageGen drew it"
+      }
+    }
+  ]
+}

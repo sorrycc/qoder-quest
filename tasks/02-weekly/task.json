@@ -1,0 +1,85 @@
+{
+  "order": 2,
+  "level": 1,
+  "emoji": "📝",
+  "minutes": 3,
+  "funny": true,
+  "title": {
+    "zh": "周报生成器",
+    "en": "The Weekly Report Machine"
+  },
+  "tagline": {
+    "zh": "这周干了啥？让 Qoder 帮你想想",
+    "en": "What did you do this week? Let Qoder remember for you"
+  },
+  "story": {
+    "zh": "周五下午五点，老板要周报。你翻了翻这周的记录 notes.md：修了一个 bug，开了四个会，剩下的时间不太方便说。",
+    "en": "Friday, 5pm, the boss wants a weekly report. You open this week's notes.md: one bug fixed, four meetings attended, and the rest is hard to put in writing."
+  },
+  "goal": {
+    "zh": "让 Qoder 把流水账写成一份体面的周报 WEEKLY.md。不许编造没干过的事，也不许出现「摸鱼」。",
+    "en": "Have Qoder turn the notes into a respectable WEEKLY.md. No inventing work that never happened, and no mention of slacking."
+  },
+  "openingPrompt": {
+    "zh": "读一下 notes.md，这是我这周的真实记录。先用一句话评价我这周的工作状态，要毒舌。先别写周报",
+    "en": "Read notes.md, my honest log of the week. First sum up my work ethic in one savage sentence. Don't write the report yet"
+  },
+  "steps": [
+    {
+      "hint": {
+        "zh": "按回车发送，接受审判。",
+        "en": "Press Enter and face the verdict."
+      }
+    },
+    {
+      "hint": {
+        "zh": "该交差了。",
+        "en": "Time to hand something in."
+      },
+      "prompt": {
+        "zh": "帮我写成一份体面的周报存到 WEEKLY.md：分「本周进展、问题与风险、下周计划」三段，用职场话术包装，但每一条都要能在 notes.md 里找到出处，不许出现摸鱼、刷剧这类词",
+        "en": "Turn it into a respectable weekly report in WEEKLY.md with three sections: Progress, Risks, Next Week. Use corporate language, but every line must trace back to something in notes.md, and words like slacking or binge-watching must not appear"
+      }
+    },
+    {
+      "hint": {
+        "zh": "看看它有多会包装。",
+        "en": "See how good the spin really is."
+      },
+      "prompt": {
+        "zh": "另外写一个 TRUTH.md 对照表：左边是周报里的说法，右边是 notes.md 里的真相",
+        "en": "Also write TRUTH.md, a table with what the report says on the left and what notes.md actually says on the right"
+      }
+    }
+  ],
+  "checks": [
+    {
+      "type": "fileExists",
+      "glob": "WEEKLY.md",
+      "label": {
+        "zh": "周报写好了（WEEKLY.md）",
+        "en": "The report exists (WEEKLY.md)"
+      }
+    },
+    {
+      "type": "fileContains",
+      "path": "WEEKLY.md",
+      "pattern": "下周|Next Week",
+      "flags": "i",
+      "label": {
+        "zh": "有下周计划",
+        "en": "It has a plan for next week"
+      }
+    },
+    {
+      "type": "fileNotContains",
+      "path": "WEEKLY.md",
+      "pattern": "摸鱼|刷剧|slack(ed|ing)|binge",
+      "flags": "i",
+      "label": {
+        "zh": "周报里没有露馅",
+        "en": "The report doesn't give you away"
+      }
+    }
+  ]
+}

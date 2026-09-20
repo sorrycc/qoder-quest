@@ -1,0 +1,82 @@
+{
+  "order": 5,
+  "level": 2,
+  "emoji": "🦸",
+  "minutes": 5,
+  "preview": "index.html",
+  "title": {
+    "zh": "把自己做进游戏",
+    "en": "Put Yourself in the Game"
+  },
+  "tagline": {
+    "zh": "先画主角，再写游戏",
+    "en": "Draw the hero first, then write the game"
+  },
+  "story": {
+    "zh": "空仓库一个。Qoder 既能画图也能写代码，两样凑一起就是一个游戏工作室。",
+    "en": "An empty repo. Qoder can draw and it can code, which adds up to a game studio."
+  },
+  "goal": {
+    "zh": "得到一张主角图和一个用它当主角的小游戏 index.html，在「预览」里玩。",
+    "en": "End up with a hero image and a small game in index.html that stars it. Play it in the Preview tab."
+  },
+  "openingPrompt": {
+    "zh": "用内置的 ImageGen 工具画一个游戏主角：一个背着双肩包、端着咖啡的像素风程序员，正面全身，纯色背景。图片名字用 hero",
+    "en": "Use the built-in ImageGen tool to draw a game hero: a pixel-art programmer with a backpack and a coffee, full body, facing forward, plain background. Name the image hero"
+  },
+  "steps": [
+    {
+      "hint": {
+        "zh": "按回车发送。想把主角换成你自己？发送前把描述改成你的样子。",
+        "en": "Press Enter. Want the hero to be you? Edit the description to match yourself first."
+      }
+    },
+    {
+      "hint": {
+        "zh": "主角有了，写游戏。",
+        "en": "Hero's ready. Now the game."
+      },
+      "prompt": {
+        "zh": "在 index.html 里写一个躲避小游戏：单文件、不用依赖，主角用刚才画的那张 hero 图片，左右方向键移动，天上不断掉下 bug 和需求变更，躲开它们，接住咖啡加分，显示分数，死了按空格重开",
+        "en": "Write a dodge game in index.html: single file, no dependencies, the hero image you just drew as the player, left and right arrows to move, bugs and change requests falling from the sky to dodge, coffee to catch for points, a score display, space to restart after dying"
+      }
+    },
+    {
+      "hint": {
+        "zh": "玩一局，再加点料。也可以自己想。",
+        "en": "Play a round, then spice it up. Or invent your own twist."
+      },
+      "prompt": {
+        "zh": "加一个大招：按 Q 键召唤 Qoder，清空屏幕上所有的 bug，每局只能用一次",
+        "en": "Add an ultimate: press Q to summon Qoder and wipe every bug off the screen, once per game"
+      }
+    }
+  ],
+  "checks": [
+    {
+      "type": "fileExists",
+      "glob": "**/hero*.png",
+      "label": {
+        "zh": "主角画好了",
+        "en": "The hero is drawn"
+      }
+    },
+    {
+      "type": "fileContains",
+      "path": "index.html",
+      "pattern": "hero[\\w-]*\\.png",
+      "label": {
+        "zh": "游戏里的主角就是这张图",
+        "en": "The game stars that image"
+      }
+    },
+    {
+      "type": "transcriptContains",
+      "pattern": "\"name\":\"ImageGen\"",
+      "label": {
+        "zh": "主角是 ImageGen 画的",
+        "en": "ImageGen drew the hero"
+      }
+    }
+  ]
+}

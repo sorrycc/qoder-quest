@@ -1,0 +1,111 @@
+@import 'tailwindcss';
+@import '@xterm/xterm/css/xterm.css';
+
+/* Same palette as qoder-booth and qoder-arena. */
+@theme {
+  --color-q-green: #2adb5c;
+  --color-q-green-dark: #17953c;
+  --color-q-purple: #b48cf2;
+  --color-q-yellow: #f5c15c;
+  --color-q-red: #ff5f57;
+  --color-fg: #e6e9e6;
+  --color-dim: #8b918c;
+  --color-line: #232824;
+  --color-bg-term: #0b0e0c;
+  --color-bg-bar: #0e120f;
+  --color-bg-backdrop: #050807;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'PingFang SC', 'Microsoft YaHei', monospace;
+
+  --animate-pop: pop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+  --animate-rise: rise 0.5s ease-out both;
+  --animate-stamp: stamp 0.45s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+  --animate-blink: blink 1.1s steps(1) infinite;
+  --animate-float: float 4s ease-in-out infinite;
+  --animate-march: march 1.2s linear infinite;
+}
+
+@keyframes pop {
+  from { opacity: 0; transform: scale(0.6); }
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(16px); }
+}
+@keyframes stamp {
+  from { opacity: 0; transform: rotate(-12deg) scale(2.4); }
+  to { opacity: 1; transform: rotate(-12deg) scale(1); }
+}
+@keyframes blink {
+  50% { opacity: 0; }
+}
+@keyframes float {
+  50% { transform: translateY(-6px); }
+}
+@keyframes march {
+  to { background-position: 16px 0; }
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg-backdrop);
+  color: var(--color-fg);
+  font-family: var(--font-mono);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Faint terminal grid behind everything. */
+.backdrop {
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgb(42 219 92 / 0.13), transparent),
+    linear-gradient(var(--color-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-line) 1px, transparent 1px);
+  background-size: 100% 100%, 40px 40px, 40px 40px;
+  background-position: 0 0, -1px -1px, -1px -1px;
+}
+
+.glow {
+  text-shadow: 0 0 18px rgb(42 219 92 / 0.55);
+}
+
+/* The dashed trail between levels, marching toward the boss. */
+.trail {
+  height: 2px;
+  background-image: linear-gradient(90deg, var(--color-q-green-dark) 50%, transparent 50%);
+  background-size: 16px 2px;
+}
+
+.card {
+  transform: perspective(700px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.12s ease-out, border-color 0.2s, box-shadow 0.2s;
+}
+.card:hover {
+  box-shadow: 0 0 0 1px var(--color-q-green), 0 12px 40px rgb(42 219 92 / 0.18);
+}
+
+.xterm {
+  height: 100%;
+  padding: 10px 4px 4px 12px;
+}
+.xterm .xterm-viewport {
+  background-color: transparent !important;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

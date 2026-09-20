@@ -1,0 +1,75 @@
+{
+  "order": 1,
+  "level": 1,
+  "emoji": "🎡",
+  "minutes": 2,
+  "preview": "index.html",
+  "title": {
+    "zh": "今天吃什么",
+    "en": "What's for Lunch"
+  },
+  "tagline": {
+    "zh": "人类终极难题，交给一个转盘",
+    "en": "Humanity's hardest question, settled by a wheel"
+  },
+  "story": {
+    "zh": "十一点五十，群里又开始了：吃啥？随便。随便是啥？今天不吵了，让转盘说了算。",
+    "en": "11:50 and the group chat starts again. What do we eat? Anything. What's anything? No more arguing today: the wheel decides."
+  },
+  "goal": {
+    "zh": "一句话得到一个能转的转盘网页，再把选项换成你自己爱吃的。",
+    "en": "Get a spinning wheel page from one sentence, then swap in the food you actually like."
+  },
+  "openingPrompt": {
+    "zh": "在 index.html 里做一个「今天吃什么」大转盘：单文件、不用任何依赖、8 个选项（麻辣烫、黄焖鸡、螺蛳粉、轻食沙拉、兰州拉面、麦当劳、饺子、不吃了减肥）、点按钮开始转、慢慢停下、停下后大字显示结果并撒花",
+    "en": "Build a What's for Lunch wheel in index.html: single file, no dependencies, 8 options (ramen, burger, tacos, salad, pizza, dumplings, fried chicken, skip lunch), a button to spin, a slow stop, then show the result in big letters with confetti"
+  },
+  "steps": [
+    {
+      "hint": {
+        "zh": "按回车发送。Qoder 写完后点上面的「预览」，转一把。",
+        "en": "Press Enter. When Qoder is done, open the Preview tab and give it a spin."
+      }
+    },
+    {
+      "hint": {
+        "zh": "换成你自己的选项，想吃什么写什么。",
+        "en": "Make it yours. Put in whatever you actually eat."
+      },
+      "prompt": {
+        "zh": "把选项换成我常吃的：火锅、烤肉、寿司、酸菜鱼、煲仔饭、泡面",
+        "en": "Replace the options with my usual places: hotpot, barbecue, sushi, pho, curry, instant noodles"
+      }
+    },
+    {
+      "hint": {
+        "zh": "作个弊。",
+        "en": "Rig it."
+      },
+      "prompt": {
+        "zh": "偷偷作弊：不管怎么转，最后都停在火锅上，但要看起来很自然",
+        "en": "Rig it quietly: no matter how it spins it always lands on hotpot, and it has to look natural"
+      }
+    }
+  ],
+  "checks": [
+    {
+      "type": "fileExists",
+      "glob": "index.html",
+      "label": {
+        "zh": "index.html 出现了",
+        "en": "index.html exists"
+      }
+    },
+    {
+      "type": "fileContains",
+      "path": "index.html",
+      "pattern": "<script",
+      "flags": "i",
+      "label": {
+        "zh": "转盘会动（里面有脚本）",
+        "en": "The wheel moves (there's a script in it)"
+      }
+    }
+  ]
+}

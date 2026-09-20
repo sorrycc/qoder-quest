@@ -1,0 +1,37 @@
+{
+  "order": 11,
+  "track": "hardcore",
+  "level": 2,
+  "emoji": "🐛",
+  "minutes": 4,
+  "title": { "zh": "线上告警", "en": "Production Alert" },
+  "tagline": { "zh": "用户说满 100 没给减 20", "en": "A customer spent exactly 100 and got no discount" },
+  "story": {
+    "zh": "大促当天，客服群炸了：有人买了两件只收了一件的钱，还有人刚好凑满 100 却没减。测试是红的。",
+    "en": "It's sale day and support is on fire. Someone bought two items and paid for one. Someone else hit exactly 100 and got nothing off. The tests are red."
+  },
+  "goal": {
+    "zh": "让 Qoder 找到 bug 并修好，测试全绿。不许改测试。",
+    "en": "Have Qoder find and fix the bugs until every test is green. Don't touch the tests."
+  },
+  "openingPrompt": {
+    "zh": "跑一下 node --test，看看哪些测试挂了，告诉我原因。先别改",
+    "en": "Run node --test, see which tests fail, and tell me why. Don't fix anything yet"
+  },
+  "steps": [
+    {
+      "hint": { "zh": "按回车发送，看 Qoder 怎么定位问题。", "en": "Press Enter, then watch Qoder track the problem down." }
+    },
+    {
+      "hint": { "zh": "让它动手修。", "en": "Tell it to fix them." },
+      "prompt": {
+        "zh": "修掉这些 bug，只改 src，不要动测试文件，修完再跑一遍测试",
+        "en": "Fix the bugs. Only change src, leave the test files alone, then run the tests again"
+      }
+    }
+  ],
+  "checks": [
+    { "type": "fileContains", "path": "test/cart.test.js", "pattern": "assert\\.strictEqual\\(discount\\(100\\), 20\\)", "label": { "zh": "测试文件没被动过手脚", "en": "The tests weren't tampered with" } },
+    { "type": "command", "cmd": "node", "args": ["--test"], "label": { "zh": "测试全绿（node --test）", "en": "All tests green (node --test)" } }
+  ]
+}

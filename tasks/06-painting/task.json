@@ -1,0 +1,82 @@
+{
+  "order": 6,
+  "level": 2,
+  "emoji": "🖼️",
+  "minutes": 4,
+  "funny": true,
+  "preview": "**/painting*.png",
+  "title": {
+    "zh": "屎山名画",
+    "en": "Spaghetti, Oil on Canvas"
+  },
+  "tagline": {
+    "zh": "把七层嵌套 if 挂进美术馆",
+    "en": "Hang seven levels of nested ifs in a gallery"
+  },
+  "story": {
+    "zh": "shishan.js 是 2019 年的运费计算函数，此后每个需求都往里塞了一层 if，现在它有七层缩进，没人敢碰。这样的代码不该被重构，应该被展出。",
+    "en": "shishan.js is a shipping-fee function from 2019. Every feature since has added another if. It is now seven levels deep and nobody dares touch it. Code like this shouldn't be refactored. It should be exhibited."
+  },
+  "goal": {
+    "zh": "让 Qoder 读懂这份代码，把它画成一幅画，再写一张美术馆展签 LABEL.md。",
+    "en": "Have Qoder read the code, paint it, and write the museum label in LABEL.md."
+  },
+  "openingPrompt": {
+    "zh": "读一下 shishan.js，如果它是一幅画，画面里会有什么？用三句话描述。先别画",
+    "en": "Read shishan.js. If it were a painting, what would be in it? Describe it in three sentences. Don't paint yet"
+  },
+  "steps": [
+    {
+      "hint": {
+        "zh": "按回车发送，听听艺术家的构思。",
+        "en": "Press Enter and hear the artist's concept."
+      }
+    },
+    {
+      "hint": {
+        "zh": "开画。",
+        "en": "Paint it."
+      },
+      "prompt": {
+        "zh": "就按这个构思，用内置的 ImageGen 工具画出来，古典油画风格，图片名字用 painting",
+        "en": "Paint exactly that with the built-in ImageGen tool, in classical oil painting style, with the image named painting"
+      }
+    },
+    {
+      "hint": {
+        "zh": "名画要有展签。",
+        "en": "A masterpiece needs a label."
+      },
+      "prompt": {
+        "zh": "给这幅画写一张美术馆展签存到 LABEL.md：作品名、作者（匿名，2019—至今）、材质（JavaScript 与悔恨）、一段一本正经的艺术评论，评论里要引用 shishan.js 里真实存在的代码细节",
+        "en": "Write the museum label into LABEL.md: title, artist (anonymous, 2019 to present), medium (JavaScript and regret), and a deadly serious critique that cites real details from shishan.js"
+      }
+    }
+  ],
+  "checks": [
+    {
+      "type": "fileExists",
+      "glob": "**/painting*.png",
+      "label": {
+        "zh": "画挂上墙了",
+        "en": "The painting is on the wall"
+      }
+    },
+    {
+      "type": "fileExists",
+      "glob": "LABEL.md",
+      "label": {
+        "zh": "展签写好了（LABEL.md）",
+        "en": "The label is written (LABEL.md)"
+      }
+    },
+    {
+      "type": "transcriptContains",
+      "pattern": "\"name\":\"ImageGen\"",
+      "label": {
+        "zh": "是 ImageGen 画的",
+        "en": "ImageGen painted it"
+      }
+    }
+  ]
+}

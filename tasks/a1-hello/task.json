@@ -1,0 +1,35 @@
+{
+  "order": 21,
+  "archived": true,
+  "track": "hardcore",
+  "level": 1,
+  "emoji": "👋",
+  "minutes": 2,
+  "title": { "zh": "你好，Qoder", "en": "Hello, Qoder" },
+  "tagline": { "zh": "接手陌生项目的第一分钟", "en": "Your first minute in an unfamiliar repo" },
+  "story": {
+    "zh": "你刚入职，同事丢给你一个仓库就去开会了。没有文档，没有交接，只有一个终端。",
+    "en": "It's your first day. A teammate hands you a repo and disappears into a meeting. No docs, no handover, just a terminal."
+  },
+  "goal": {
+    "zh": "不读一行代码，让 Qoder 帮你搞懂这个项目。",
+    "en": "Understand the project without reading a single line yourself."
+  },
+  "openingPrompt": {
+    "zh": "用三句话告诉我这个项目是做什么的",
+    "en": "Tell me what this project does in three sentences"
+  },
+  "steps": [
+    {
+      "hint": { "zh": "第一句提示词已经输进右边的终端了，按回车发送，看 Qoder 都翻了哪些文件。", "en": "The first prompt is already typed into the terminal on the right. Press Enter, then watch which files Qoder opens." }
+    },
+    {
+      "hint": { "zh": "追问一个细节。", "en": "Ask about a detail." },
+      "prompt": { "zh": "代码里藏了一个周五彩蛋，是什么？", "en": "There is a Friday easter egg hidden in the code. What is it?" }
+    },
+    {
+      "hint": { "zh": "让它画张图。", "en": "Ask for a diagram." },
+      "prompt": { "zh": "用 ASCII 画一张这个项目的模块关系图", "en": "Draw an ASCII diagram of how the modules relate" }
+    }
+  ]
+}

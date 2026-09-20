@@ -1,0 +1,90 @@
+{
+  "order": 7,
+  "level": 3,
+  "emoji": "💬",
+  "minutes": 7,
+  "preview": "index.html",
+  "title": {
+    "zh": "四格漫画《程序员的一天》",
+    "en": "Four Panels: A Programmer's Day"
+  },
+  "tagline": {
+    "zh": "编剧、画师、排版，都是同一个终端",
+    "en": "Writer, illustrator and layout, all in one terminal"
+  },
+  "story": {
+    "zh": "公司内刊缺一篇稿子，主编说来个四格漫画吧。你不会画画，但你有 Qoder。难点在于四张图里得是同一个人。",
+    "en": "The company newsletter has a hole to fill and the editor wants a four-panel comic. You can't draw, but you have Qoder. The hard part: it has to be the same person in all four panels."
+  },
+  "goal": {
+    "zh": "先定剧本，再画四格，最后拼成一页带对白的漫画 index.html。",
+    "en": "Settle the script, draw the four panels, then lay them out with dialogue as a comic page in index.html."
+  },
+  "openingPrompt": {
+    "zh": "我要做一个四格漫画《程序员的一天》。先写剧本：四格分别是早上、中午、下午、深夜，每格一句画面描述和一句对白，最后一格要有反转。再定一个主角的固定外形描述，后面四张图都用它。先别画",
+    "en": "I'm making a four-panel comic, A Programmer's Day. Write the script first: morning, noon, afternoon, late night, with one line of scene description and one line of dialogue each, and a twist in the last panel. Then fix one description of the main character's look to reuse in all four images. Don't draw yet"
+  },
+  "steps": [
+    {
+      "hint": {
+        "zh": "按回车发送。剧本不好笑就让它改，你是主编。",
+        "en": "Press Enter. If the script isn't funny, send it back. You're the editor."
+      }
+    },
+    {
+      "hint": {
+        "zh": "剧本定了，开画。四张图要等一会。",
+        "en": "Script approved. Draw it. Four images take a little while."
+      },
+      "prompt": {
+        "zh": "按剧本用内置的 ImageGen 工具画四格，图片名字依次用 panel-1 到 panel-4。四张图用同一段主角外形描述和同一种画风（简洁的黑白线条加一点强调色），图里不要出现文字",
+        "en": "Draw the four panels from the script with the built-in ImageGen tool naming the images panel-1 through panel-4. Use the same character description and the same style in all four (clean black and white line art with one accent colour), and no text inside the images"
+      }
+    },
+    {
+      "hint": {
+        "zh": "排版。对白用 HTML 写，比让模型在图里写字靠谱。",
+        "en": "Layout. Dialogue goes in HTML, which beats asking a model to letter inside an image."
+      },
+      "prompt": {
+        "zh": "做一页 index.html 把刚才那四张图（在 vibe_images 目录里）排成 2x2 的四格漫画：单文件，每格有编号和对白气泡，对白用剧本里的原话，顶部是标题，漫画纸风格",
+        "en": "Build index.html laying out those four images (they are in vibe_images) as a 2x2 comic: single file, each panel numbered with a speech bubble using the script's exact lines, the title on top, comic paper styling"
+      }
+    }
+  ],
+  "checks": [
+    {
+      "type": "fileExists",
+      "glob": "**/panel-1*.png",
+      "label": {
+        "zh": "第一格画好了",
+        "en": "Panel one is drawn"
+      }
+    },
+    {
+      "type": "fileExists",
+      "glob": "**/panel-4*.png",
+      "label": {
+        "zh": "第四格画好了",
+        "en": "Panel four is drawn"
+      }
+    },
+    {
+      "type": "fileContains",
+      "path": "index.html",
+      "pattern": "panel-4[\\w-]*\\.png",
+      "label": {
+        "zh": "四格拼成了一页（index.html）",
+        "en": "The panels are laid out (index.html)"
+      }
+    },
+    {
+      "type": "transcriptContains",
+      "pattern": "\"name\":\"ImageGen\"",
+      "label": {
+        "zh": "是 ImageGen 画的",
+        "en": "ImageGen drew them"
+      }
+    }
+  ]
+}

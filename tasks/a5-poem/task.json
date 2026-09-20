@@ -1,0 +1,44 @@
+{
+  "order": 24,
+  "archived": true,
+  "track": "hardcore",
+  "level": 2,
+  "emoji": "💩",
+  "minutes": 5,
+  "funny": true,
+  "title": { "zh": "为屎山赋诗一首", "en": "An Ode to Spaghetti" },
+  "tagline": { "zh": "先写诗骂它，再动手救它", "en": "Roast it in verse, then rescue it" },
+  "story": {
+    "zh": "shishan.js 是 2019 年的运费计算函数，此后每个需求都往里塞了一层 if。现在它有七层缩进，没人敢碰。",
+    "en": "shishan.js is a shipping-fee function from 2019. Every feature since has added another if. It is now seven levels deep and nobody dares touch it."
+  },
+  "goal": {
+    "zh": "得到一首吐槽诗 POEM.md，以及一个重构后测试依然全绿的 shishan.js。",
+    "en": "End up with a roast poem in POEM.md and a refactored shishan.js that still passes every test."
+  },
+  "openingPrompt": {
+    "zh": "读一下 shishan.js，为它写一首七言打油诗，吐槽它有多烂，写到 POEM.md 里，也念给我听",
+    "en": "Read shishan.js and write a limerick roasting how bad it is. Save it to POEM.md and read it to me"
+  },
+  "steps": [
+    {
+      "hint": { "zh": "品一品这首诗。", "en": "Savor the poem." }
+    },
+    {
+      "hint": { "zh": "骂完了，救一下。", "en": "Roast done. Now save it." },
+      "prompt": {
+        "zh": "重构 shishan.js：消灭嵌套 if，用查表代替分支，导出的 calc 签名不变，不要改测试，改完跑 node --test",
+        "en": "Refactor shishan.js: flatten the nested ifs, use lookup tables instead of branches, keep the exported calc signature, don't touch the tests, then run node --test"
+      }
+    },
+    {
+      "hint": { "zh": "再来一首庆功诗？", "en": "A victory poem?" },
+      "prompt": { "zh": "在 POEM.md 后面再加一首，庆祝重构成功", "en": "Append another poem to POEM.md celebrating the refactor" }
+    }
+  ],
+  "checks": [
+    { "type": "fileExists", "glob": "POEM.md", "label": { "zh": "诗写好了（POEM.md）", "en": "The poem exists (POEM.md)" } },
+    { "type": "fileNotContains", "path": "shishan.js", "pattern": "\\n {12,}if", "label": { "zh": "嵌套 if 被铲平了", "en": "The nested ifs are flattened" } },
+    { "type": "command", "cmd": "node", "args": ["--test"], "label": { "zh": "测试全绿（node --test）", "en": "All tests green (node --test)" } }
+  ]
+}

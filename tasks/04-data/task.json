@@ -1,0 +1,75 @@
+{
+  "order": 4,
+  "level": 2,
+  "emoji": "🧋",
+  "minutes": 4,
+  "preview": "index.html",
+  "title": {
+    "zh": "数据会说话",
+    "en": "Let the Data Talk"
+  },
+  "tagline": {
+    "zh": "一份销量表，一个要砍掉的产品",
+    "en": "One sales sheet, one product to cut"
+  },
+  "story": {
+    "zh": "你接手了一家奶茶店。上任老板留下四周的销量表 sales.csv 和一句话：菜单太长，得砍掉一款。砍哪款？",
+    "en": "You just took over a bubble tea shop. The previous owner left four weeks of sales in sales.csv and one piece of advice: the menu is too long, cut one drink. Which one?"
+  },
+  "goal": {
+    "zh": "让 Qoder 分析数据、做一页图表，并把该下架的那一款写进 ANSWER.md。答案只有一个。",
+    "en": "Have Qoder analyse the data, build a page of charts, and write the drink to drop into ANSWER.md. There is exactly one right answer."
+  },
+  "openingPrompt": {
+    "zh": "读一下 sales.csv，这是我奶茶店四周的销量。告诉我每款产品的总销量、总营收和四周的趋势，用表格。先别下结论",
+    "en": "Read sales.csv, four weeks of sales from my bubble tea shop. Give me total cups, total revenue and the four-week trend for each product, as a table. No conclusions yet"
+  },
+  "steps": [
+    {
+      "hint": {
+        "zh": "按回车发送，看 Qoder 怎么算。它会自己写脚本跑数据。",
+        "en": "Press Enter and watch Qoder crunch it. It writes its own script to do the maths."
+      }
+    },
+    {
+      "hint": {
+        "zh": "做成老板看得懂的样子。",
+        "en": "Make it something a boss can read."
+      },
+      "prompt": {
+        "zh": "做一页 index.html 仪表盘：单文件、不用外部依赖，用 SVG 或 canvas 画每款产品的营收柱状图和四周趋势折线图，数据直接写在页面里",
+        "en": "Build a dashboard in index.html: single file, no external dependencies, SVG or canvas charts of revenue per product and the four-week trend lines, with the data inlined in the page"
+      }
+    },
+    {
+      "hint": {
+        "zh": "下结论。",
+        "en": "Make the call."
+      },
+      "prompt": {
+        "zh": "菜单要砍掉一款，该砍哪个？综合营收和趋势判断，把结论和三条理由写进 ANSWER.md",
+        "en": "One drink has to go. Which? Weigh revenue and trend, then write the verdict and three reasons into ANSWER.md"
+      }
+    }
+  ],
+  "checks": [
+    {
+      "type": "fileExists",
+      "glob": "index.html",
+      "label": {
+        "zh": "图表页做好了（index.html）",
+        "en": "The chart page exists (index.html)"
+      }
+    },
+    {
+      "type": "fileContains",
+      "path": "ANSWER.md",
+      "pattern": "香菜柠檬茶|Cilantro",
+      "flags": "i",
+      "label": {
+        "zh": "ANSWER.md 里砍对了产品",
+        "en": "ANSWER.md cuts the right drink"
+      }
+    }
+  ]
+}

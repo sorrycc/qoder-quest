@@ -1,0 +1,39 @@
+{
+  "order": 22,
+  "archived": true,
+  "track": "hardcore",
+  "level": 1,
+  "emoji": "🏷️",
+  "minutes": 3,
+  "funny": true,
+  "title": { "zh": "给代码起外号", "en": "Nickname the Code" },
+  "tagline": { "zh": "doStuff2 到底 do 了什么 stuff", "en": "What stuff does doStuff2 actually do?" },
+  "story": {
+    "zh": "前任留下了 utils.js 就跑路了。变量叫 tmp、tmp2、aaa、bbb，函数叫 doStuff 和 doStuff2。",
+    "en": "Your predecessor left utils.js behind and vanished. Variables named tmp, tmp2, aaa, bbb. Functions named doStuff and doStuff2."
+  },
+  "goal": {
+    "zh": "先让 Qoder 吐槽个够，再把名字改成人话，行为不能变。",
+    "en": "Let Qoder roast the names first, then rename everything properly without changing behavior."
+  },
+  "openingPrompt": {
+    "zh": "读一下 utils.js，狠狠吐槽里面的命名，给每个函数和变量起一个好笑的外号。先别改代码",
+    "en": "Read utils.js and roast the naming. Give every function and variable a funny nickname. Don't change any code yet"
+  },
+  "steps": [
+    {
+      "hint": { "zh": "欣赏一下吐槽。", "en": "Enjoy the roast." }
+    },
+    {
+      "hint": { "zh": "玩够了，干正事。", "en": "Fun's over. Do the real work." },
+      "prompt": {
+        "zh": "现在认真点：把 utils.js 里的函数和变量都改成一眼能看懂的名字，保持导出顺序和行为不变，改完跑 node test.js 验证",
+        "en": "Now seriously: rename every function and variable in utils.js so they explain themselves. Keep the export order and behavior, then run node test.js to verify"
+      }
+    }
+  ],
+  "checks": [
+    { "type": "fileNotContains", "path": "utils.js", "pattern": "doStuff|tmp2|aaa|bbb|data1", "label": { "zh": "烂名字都消失了", "en": "The bad names are gone" } },
+    { "type": "command", "cmd": "node", "args": ["test.js"], "label": { "zh": "行为没变（node test.js）", "en": "Behavior unchanged (node test.js)" } }
+  ]
+}

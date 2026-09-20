@@ -1,0 +1,166 @@
+{
+  "order": 8,
+  "level": 3,
+  "emoji": "🚀",
+  "minutes": 10,
+  "parMinutes": 8,
+  "preview": "index.html",
+  "title": {
+    "zh": "Boss 战：一句话开公司",
+    "en": "Boss Fight: A Company from One Sentence"
+  },
+  "tagline": {
+    "zh": "名字、Logo、落地页、宣传片，投资人 8 分钟后到",
+    "en": "Name, logo, landing page, promo. The investor arrives in 8 minutes"
+  },
+  "story": {
+    "zh": "电梯里偶遇投资人，你脱口而出一个点子，对方说：有意思，8 分钟后来我办公室聊。你现在什么都没有。",
+    "en": "You pitch an idea to an investor in a lift. Interesting, they say, come to my office in 8 minutes. You have nothing."
+  },
+  "goal": {
+    "zh": "8 分钟内凑齐：一个 Logo、用上它的落地页 index.html、一段 VideoGen 生成的宣传片并嵌进落地页。除了开场那一句，怎么指挥 Qoder 你自己定。",
+    "en": "Within 8 minutes: a logo, a landing page index.html that uses it, and a VideoGen promo embedded in that page. Past the opening line, how you direct Qoder is up to you."
+  },
+  "openingPrompt": {
+    "zh": "我要开一家公司：给程序员喝的防脱发咖啡。先用内置的 VideoGen 工具提交一段 5 秒的宣传片：一杯冒着热气的咖啡放在机械键盘旁，镜头推近，电影感。提交完不要等它，马上告诉我，我们先干别的",
+    "en": "I'm starting a company: anti-hair-loss coffee for programmers. First use the built-in VideoGen tool to submit a 5 second promo: a steaming cup of coffee beside a mechanical keyboard, slow push-in, cinematic. Don't wait for it after submitting. Tell me right away and we'll get on with the rest"
+  },
+  "steps": [
+    {
+      "hint": {
+        "zh": "这一关没有提示词按钮。视频要几分钟才能生成完，所以第一句先把它提交了，别干等。",
+        "en": "No prompt buttons on this level. The video takes minutes to generate, so the opening line submits it first. Don't sit and wait."
+      }
+    },
+    {
+      "hint": {
+        "zh": "视频在后台跑的时候，自己打字指挥 Qoder：起名字、用 ImageGen 画一个 logo（图片名字用 logo）、做落地页 index.html 并用上这个 logo。",
+        "en": "While the video cooks, type your own orders: pick a name, have ImageGen draw a logo (name the image logo), build the landing page index.html around that logo."
+      }
+    },
+    {
+      "hint": {
+        "zh": "视频好了 Qoder 会收到通知。让它把 mp4 放到落地页首屏，点「预览」验收。",
+        "en": "Qoder is notified when the video is ready. Have it put the mp4 at the top of the landing page, then check the Preview tab."
+      }
+    }
+  ],
+  "checks": [
+    {
+      "type": "fileExists",
+      "glob": "**/logo*.png",
+      "label": {
+        "zh": "Logo 画好了",
+        "en": "The logo is drawn"
+      }
+    },
+    {
+      "type": "fileContains",
+      "path": "index.html",
+      "pattern": "logo[\\w-]*\\.png",
+      "label": {
+        "zh": "落地页用上了 Logo（index.html）",
+        "en": "The landing page uses the logo (index.html)"
+      }
+    },
+    {
+      "type": "fileExists",
+      "glob": "**/*.mp4",
+      "label": {
+        "zh": "宣传片生成好了（mp4）",
+        "en": "The promo is rendered (mp4)"
+      }
+    },
+    {
+      "type": "fileContains",
+      "path": "index.html",
+      "pattern": "\\.mp4",
+      "label": {
+        "zh": "宣传片嵌进了落地页",
+        "en": "The promo is embedded in the landing page"
+      }
+    },
+    {
+      "type": "transcriptContains",
+      "pattern": "\"name\":\"VideoGen\"",
+      "label": {
+        "zh": "宣传片是 VideoGen 生成的",
+        "en": "VideoGen made the promo"
+      }
+    }
+  ],
+  "requires": [
+    "video"
+  ],
+  "fallback": {
+    "minutes": 8,
+    "parMinutes": 6,
+    "tagline": {
+      "zh": "名字、Logo、落地页，投资人 6 分钟后到",
+      "en": "Name, logo, landing page. The investor arrives in 6 minutes"
+    },
+    "story": {
+      "zh": "电梯里偶遇投资人，你脱口而出一个点子，对方说：有意思，6 分钟后来我办公室聊。你现在什么都没有。",
+      "en": "You pitch an idea to an investor in a lift. Interesting, they say, come to my office in 6 minutes. You have nothing."
+    },
+    "goal": {
+      "zh": "6 分钟内凑齐：一个 Logo，以及用上它、首屏带动画的落地页 index.html。除了开场那一句，怎么指挥 Qoder 你自己定。",
+      "en": "Within 6 minutes: a logo and a landing page index.html that uses it and opens with an animated hero. Past the opening line, how you direct Qoder is up to you."
+    },
+    "openingPrompt": {
+      "zh": "我要开一家公司：给程序员喝的防脱发咖啡。先帮我起三个公司名，每个配一句 slogan，让我挑",
+      "en": "I'm starting a company: anti-hair-loss coffee for programmers. Give me three company names, each with a slogan, and let me pick"
+    },
+    "steps": [
+      {
+        "hint": {
+          "zh": "这一关没有提示词按钮。挑好名字后自己打字指挥 Qoder：用 ImageGen 画一个 logo（图片名字用 logo），做落地页 index.html 并用上这个 logo。",
+          "en": "No prompt buttons on this level. Once you've picked a name, type your own orders: have ImageGen draw a logo (name the image logo), then build the landing page index.html around it."
+        }
+      },
+      {
+        "hint": {
+          "zh": "落地页首屏要有动画（CSS animation 就行），点「预览」验收。想省时间就一句话把要求讲全。",
+          "en": "The top of the page needs animation (CSS animation will do). Check the Preview tab. To save time, put every requirement in one message."
+        }
+      }
+    ],
+    "checks": [
+      {
+        "type": "fileExists",
+        "glob": "**/logo*.png",
+        "label": {
+          "zh": "Logo 画好了",
+          "en": "The logo is drawn"
+        }
+      },
+      {
+        "type": "fileContains",
+        "path": "index.html",
+        "pattern": "logo[\\w-]*\\.png",
+        "label": {
+          "zh": "落地页用上了 Logo（index.html）",
+          "en": "The landing page uses the logo (index.html)"
+        }
+      },
+      {
+        "type": "fileContains",
+        "path": "index.html",
+        "pattern": "@keyframes|animation",
+        "flags": "i",
+        "label": {
+          "zh": "首屏会动（CSS 动画）",
+          "en": "The hero moves (CSS animation)"
+        }
+      },
+      {
+        "type": "transcriptContains",
+        "pattern": "\"name\":\"ImageGen\"",
+        "label": {
+          "zh": "Logo 是 ImageGen 画的",
+          "en": "ImageGen drew the logo"
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "order": 12,
+  "track": "hardcore",
+  "level": 3,
+  "emoji": "🪄",
+  "minutes": 6,
+  "title": { "zh": "造一条自己的命令", "en": "Forge Your Own Command" },
+  "tagline": { "zh": "把常用的提示词做成 Skill，用 /斜杠命令 调出来", "en": "Turn a prompt you keep typing into a Skill you call with a slash" },
+  "story": {
+    "zh": "每次 review 代码你都要打同一大段话。Qoder 的 Skill 就是一个 Markdown 文件，放进 .qoder/skills/<名字>/SKILL.md，就能用 /名字 调出来。",
+    "en": "You type the same paragraph every time you review code. A Qoder Skill is one Markdown file: drop it into .qoder/skills/<name>/SKILL.md and call it with /name."
+  },
+  "goal": {
+    "zh": "让 Qoder 帮你造一个 roast Skill，然后用 /roast 毒舌点评 review-me.js。要真的用过才算过关。",
+    "en": "Have Qoder build a roast Skill, then use /roast to savage review-me.js. It only counts once you've actually run it."
+  },
+  "openingPrompt": {
+    "zh": "帮我创建一个 Qoder Skill，名字叫 roast：文件放在 .qoder/skills/roast/SKILL.md，带 frontmatter（name 和 description），内容是让你用脱口秀演员的口吻毒舌点评用户指定的代码文件。输出要短：三条吐槽，每条一句话，最后用一句话给一条正经建议。SKILL.md 本身也写短一点",
+    "en": "Create a Qoder Skill named roast for me: put it in .qoder/skills/roast/SKILL.md with frontmatter (name and description). It should make you review a file the user names in the voice of a stand-up comedian. Keep the output short: three one-line roasts, then one serious suggestion in a single sentence. Keep SKILL.md itself short too"
+  },
+  "steps": [
+    {
+      "hint": { "zh": "看它写出来的 SKILL.md，一个 Skill 就是一段提示词。", "en": "Look at the SKILL.md it writes. A Skill is just a prompt." }
+    },
+    {
+      "hint": {
+        "zh": "试试你的新 Skill。输入 / 能看到列表。如果没出现，点右上角「重启终端」再试，对话会接着上次的继续。",
+        "en": "Try your new Skill. Typing / shows the list. If it's missing, hit Restart terminal at the top right; the conversation picks up where it left off."
+      },
+      "prompt": { "zh": "/roast review-me.js", "en": "/roast review-me.js" }
+    },
+    {
+      "hint": { "zh": "Skill 可以改。换个人设？", "en": "Skills are editable. Try another persona?" },
+      "prompt": { "zh": "把 /roast 的人设改成一位痛心疾首的语文老师", "en": "Change the /roast persona to a deeply disappointed English teacher" }
+    }
+  ],
+  "checks": [
+    { "type": "fileExists", "glob": ".qoder/skills/roast/SKILL.md", "label": { "zh": "Skill 造好了（.qoder/skills/roast/SKILL.md）", "en": "The Skill exists (.qoder/skills/roast/SKILL.md)" } },
+    { "type": "fileContains", "path": ".qoder/skills/roast/SKILL.md", "pattern": "^---[\\s\\S]*description:", "label": { "zh": "frontmatter 里有 description", "en": "The frontmatter has a description" } },
+    { "type": "transcriptContains", "pattern": "<command-name>/roast</command-name>|\"name\":\"Skill\",\"input\":\\{\"skill\":\"roast\"", "label": { "zh": "真的用过 /roast 了", "en": "/roast has actually been run" } }
+  ]
+}

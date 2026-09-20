@@ -1,0 +1,43 @@
+{
+  "order": 23,
+  "archived": true,
+  "track": "main",
+  "level": 2,
+  "emoji": "🐍",
+  "minutes": 5,
+  "preview": "index.html",
+  "title": { "zh": "一句话小游戏", "en": "One-Sentence Game" },
+  "tagline": { "zh": "说一句话，玩一局游戏", "en": "Say one sentence, play one game" },
+  "story": {
+    "zh": "空仓库一个。你说想要什么游戏，Qoder 现场写，写完点「预览」就能玩。",
+    "en": "An empty repo. Tell Qoder what game you want, it writes it on the spot, and you play it in the Preview tab."
+  },
+  "goal": {
+    "zh": "得到一个能玩的 index.html，然后按你的想法改它。",
+    "en": "Get a playable index.html, then change it however you like."
+  },
+  "openingPrompt": {
+    "zh": "在 index.html 里写一个贪吃蛇小游戏：单文件、不用任何依赖、黑底绿色霓虹风、方向键和 WASD 都能控制、显示分数、死了按空格重开",
+    "en": "Write a snake game in index.html: single file, no dependencies, black background with green neon style, arrow keys and WASD both work, show the score, press space to restart after dying"
+  },
+  "steps": [
+    {
+      "hint": { "zh": "等 Qoder 写完，点上面的「预览」玩一局。", "en": "Wait for Qoder to finish, then open the Preview tab and play a round." }
+    },
+    {
+      "hint": { "zh": "加点料。也可以自己想一个。", "en": "Spice it up. Or come up with your own idea." },
+      "prompt": {
+        "zh": "加一个彩蛋：每吃 5 个食物蛇就变一次颜色，速度加快一点，屏幕上飘过一句夸我的话",
+        "en": "Add an easter egg: every 5 foods the snake changes color, speeds up a bit, and a compliment for me floats across the screen"
+      }
+    },
+    {
+      "hint": { "zh": "不想玩蛇？换一个。", "en": "Not into snakes? Swap it." },
+      "prompt": { "zh": "把它改成 2048", "en": "Turn it into 2048" }
+    }
+  ],
+  "checks": [
+    { "type": "fileExists", "glob": "index.html", "label": { "zh": "index.html 出现了", "en": "index.html exists" } },
+    { "type": "fileContains", "path": "index.html", "pattern": "<canvas|<script", "flags": "i", "label": { "zh": "里面有能跑的游戏代码", "en": "It contains runnable game code" } }
+  ]
+}

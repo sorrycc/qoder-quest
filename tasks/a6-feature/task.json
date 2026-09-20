@@ -1,0 +1,46 @@
+{
+  "order": 25,
+  "archived": true,
+  "track": "hardcore",
+  "level": 3,
+  "emoji": "🗺️",
+  "minutes": 6,
+  "title": { "zh": "先计划，再动手", "en": "Plan First, Then Build" },
+  "tagline": { "zh": "跨文件加功能，用 Plan 模式稳着来", "en": "A multi-file feature, done calmly with Plan mode" },
+  "story": {
+    "zh": "产品经理要给 todo 加「优先级」，还贴心地写好了验收测试 test/priority.test.js。改动会涉及存储、格式化和命令行三个文件。",
+    "en": "The PM wants priorities in the todo app and has kindly written the acceptance tests in test/priority.test.js. The change touches storage, formatting and the CLI."
+  },
+  "goal": {
+    "zh": "先让 Qoder 出计划，你审过再让它实现，最后验收测试全绿。",
+    "en": "Get a plan from Qoder, review it, then let it build until the acceptance tests pass."
+  },
+  "openingPrompt": {
+    "zh": "我要给这个 todo 应用加优先级功能，验收标准在 test/priority.test.js。先读代码，给我一个分步实现计划，列出要改哪些文件。先不要改任何代码",
+    "en": "I want to add priorities to this todo app. The acceptance criteria are in test/priority.test.js. Read the code and give me a step-by-step plan listing which files change. Don't modify any code yet"
+  },
+  "steps": [
+    {
+      "hint": { "zh": "读一读它的计划。小技巧：按 Shift+Tab 可以切换权限模式，输入 /plan 进入 Plan 模式，那时它只读不写。", "en": "Read the plan. Tip: Shift+Tab cycles permission modes and /plan enters Plan mode, where Qoder reads but never writes." }
+    },
+    {
+      "hint": { "zh": "给计划提个意见，像审同事的方案一样。", "en": "Push back on the plan like you would with a teammate." },
+      "prompt": {
+        "zh": "计划里加一条：cli.js 的 add 命令要支持 --priority 参数",
+        "en": "Add one thing to the plan: the add command in cli.js should accept a --priority flag"
+      }
+    },
+    {
+      "hint": { "zh": "计划没问题了，放手让它干。", "en": "Plan looks good. Let it build." },
+      "prompt": {
+        "zh": "计划没问题，开始实现。不要改测试文件，做完跑 node --test",
+        "en": "The plan is good, go ahead. Don't change the test files, and run node --test when done"
+      }
+    }
+  ],
+  "checks": [
+    { "type": "fileContains", "path": "test/priority.test.js", "pattern": "assert\\.throws\\(\\(\\) => add\\(\\[\\], '摸鱼', 'urgent'\\)\\)", "label": { "zh": "验收测试没被动过手脚", "en": "The acceptance tests weren't tampered with" } },
+    { "type": "fileContains", "path": "src/cli.js", "pattern": "priority", "label": { "zh": "命令行支持 --priority", "en": "The CLI accepts --priority" } },
+    { "type": "command", "cmd": "node", "args": ["--test"], "label": { "zh": "测试全绿（node --test）", "en": "All tests green (node --test)" } }
+  ]
+}

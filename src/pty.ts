@@ -4,6 +4,7 @@ import path from 'node:path';
 import * as pty from 'node-pty';
 
 const QODERCLI_BIN = process.env.QODERCLI_BIN ?? 'qodercli';
+const WINDOWS = process.platform === 'win32';
 
 // Auto mode decides most things on its own. These never need a second thought.
 const ALLOWED_TOOLS = [
@@ -39,6 +40,30 @@ function buildEnv(): Record<string, string> {
   return env;
 }
 
+/**
+ * Windows only. ConPTY starts processes with CreateProcess, which neither searches PATHEXT nor runs scripts,
+ * and an npm-installed qodercli is a qodercli.cmd shim. Find what the name really points at.
+ */
+export function resolveOnWindows(bin: string, env: Record<string, string | undefined> = process.env): string {
+  const exts = path.extname(bin) ? [''] : ['.exe', '.cmd', '.bat'];
+  const dirs = /[\\/]/.test(bin) ? [''] : (env.Path ?? env.PATH ?? '').split(';').filter(Boolean);
+  for (const dir of dirs) {
+    for (const ext of exts) {
+      const file = path.win32.join(dir, bin + ext);
+      if (fs.existsSync(file)) return file;
+    }
+  }
+  return bin;
+}
+
+const quote = (arg: string) => (/[\s&()^|<>"]/.test(arg) ? `"${arg}"` : arg);
+
+/** A .cmd shim has to go through cmd.exe. /s plus one pair of outer quotes is the only form whose inner quoting cmd leaves alone. */
+export function windowsCommand(file: string, args: string[], env: Record<string, string | undefined> = process.env): { file: string; args: string[] | string } {
+  if (!/\.(cmd|bat)$/i.test(file)) return { file, args };
+  return { file: env.ComSpec ?? 'cmd.exe', args: `/d /s /c "${[file, ...args].map(quote).join(' ')}"` };
+}
+
 export interface SpawnOptions {
   cwd: string;
   /** Pick the sandbox's previous conversation back up. */
@@ -47,7 +72,7 @@ export interface SpawnOptions {
   rows: number;
 }
 
-/** qodercli runs as the PTY's own process, no shell in between: when it exits the session is over. */
+/** qodercli runs as the PTY's own process, no shell in between: when it exits the session is over. (A Windows .cmd shim needs cmd.exe, which exits with it.) */
 export function spawnQoder({ cwd, resume, cols, rows }: SpawnOptions): pty.IPty {
   const args = [
     // A clean config root keeps the booth machine's personal skills, MCP servers and hooks out of the demo.
@@ -58,5 +83,6 @@ export function spawnQoder({ cwd, resume, cols, rows }: SpawnOptions): pty.IPty 
     '--allowed-tools', ALLOWED_TOOLS.join(','),
     ...(resume ? ['-c'] : []),
   ];
-  return pty.spawn(QODERCLI_BIN, args, { name: 'xterm-256color', cols, rows, cwd, env: buildEnv() });
+  const cmd = WINDOWS ? windowsCommand(resolveOnWindows(QODERCLI_BIN), args) : { file: QODERCLI_BIN, args };
+  return pty.spawn(cmd.file, cmd.args, { name: 'xterm-256color', cols, rows, cwd, env: buildEnv() });
 }

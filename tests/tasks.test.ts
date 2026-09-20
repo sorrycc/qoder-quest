@@ -4,6 +4,7 @@ import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { runChecks } from '../src/checks.ts';
 import { pidsMentioning } from '../src/proc.ts';
+import { windowsCommand } from '../src/pty.ts';
 import { loadAllTasks, loadConfig, loadFeatures, loadTasks, saveConfig, TASKS_DIR } from '../src/tasks.ts';
 import { transcriptDir } from '../src/transcript.ts';
 import type { L } from '../src/types.ts';
@@ -150,5 +151,21 @@ describe('runChecks', () => {
   it('command passes on exit 0', async () => {
     expect(await ok({ type: 'command', cmd: 'node', args: ['-e', 'process.exit(0)'], label })).toBe(true);
     expect(await ok({ type: 'command', cmd: 'node', args: ['-e', 'process.exit(1)'], label })).toBe(false);
+  });
+});
+
+describe('windowsCommand', () => {
+  const args = ['-w', 'C:\\Users\\booth pc\\.qoder-quest\\sandboxes\\01-lunch-ab12cd34', '--allowed-tools', 'Bash(node --test:*),ImageGen'];
+
+  it('starts a real executable directly', () => {
+    expect(windowsCommand('C:\\tools\\qodercli.exe', args)).toEqual({ file: 'C:\\tools\\qodercli.exe', args });
+  });
+
+  it('runs an npm .cmd shim through cmd.exe, quoting what cmd would otherwise split or interpret', () => {
+    const cmd = windowsCommand('C:\\Program Files\\nodejs\\qodercli.cmd', args, { ComSpec: 'C:\\Windows\\System32\\cmd.exe' });
+    expect(cmd.file).toBe('C:\\Windows\\System32\\cmd.exe');
+    expect(cmd.args).toBe(
+      '/d /s /c ""C:\\Program Files\\nodejs\\qodercli.cmd" -w "C:\\Users\\booth pc\\.qoder-quest\\sandboxes\\01-lunch-ab12cd34" --allowed-tools "Bash(node --test:*),ImageGen""',
+    );
   });
 });

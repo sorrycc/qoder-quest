@@ -13,6 +13,8 @@ You need Node 22 or later and a logged-in `qodercli`. Set `QODER_MODEL` to pick 
 
 To add a level, create `tasks/<id>/` with a `task.json` and a `template/` directory, then refresh the page. `TaskDef` in `src/types.ts` lists the fields. Staff turn levels and video generation on or off from the settings page at the bottom of the map.
 
+The server runs on macOS, Linux and Windows 10 1809 or later. On Windows it finds `qodercli.exe` or the npm `qodercli.cmd` shim on `PATH` by itself; set `QODERCLI_BIN` to a full path to override. When nobody is playing, `curl localhost:4318/api/health` should report zero sessions and zero processes.
+
 Visitors get a real `qodercli` in auto permission mode, so keep secrets off the booth machine and keep a staff member nearby.
 
 ## License

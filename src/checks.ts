@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { killAll, processTree } from './proc.ts';
+import { killTree } from './proc.ts';
 import { readTranscript } from './transcript.ts';
 import type { Check, CheckResult } from './types.ts';
 
@@ -17,9 +17,9 @@ function read(cwd: string, rel: string): string | null {
 
 function runCommand(cwd: string, cmd: string, args: string[], timeoutMs: number): Promise<boolean> {
   return new Promise((resolve) => {
-    const child = spawn(cmd, args, { cwd, stdio: 'ignore' });
+    const child = spawn(cmd, args, { cwd, stdio: 'ignore', windowsHide: true });
     // `node --test` runs each file in a child of its own. A visitor's infinite loop must not outlive the check.
-    const timer = setTimeout(() => killAll(processTree(child.pid!), 'SIGKILL'), timeoutMs);
+    const timer = setTimeout(() => child.pid && killTree(child.pid), timeoutMs);
     child.on('error', () => resolve(false));
     child.on('close', (code) => {
       clearTimeout(timer);

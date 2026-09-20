@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { IPty } from 'node-pty';
-import { killAll, processTree } from './proc.ts';
+import { killAll, killTree, processTree } from './proc.ts';
 import { spawnQoder } from './pty.ts';
 import { createSandbox, removeSandbox } from './sandbox.ts';
 import { readTranscript } from './transcript.ts';
@@ -74,20 +74,23 @@ export function startPty(session: Session, cols: number, rows: number, onPrompte
  * A hangup lets qodercli close its MCP servers and save the conversation. It is not trusted to take
  * everything with it: a command it started can sit in its own process group and outlive it, and on a
  * booth that runs all day those add up. So the whole tree is recorded first and swept after a grace period.
+ *
+ * Windows has no hangup to be polite with: closing the ConPTY is already a hard kill, and one that leaves
+ * grandchildren behind. There the tree goes first, while it can still be walked from its root.
  */
 export function stopPty(session: Session, now = false): void {
   const term = session.pty;
   session.pty = undefined;
   if (!term) return;
-  const pids = processTree(term.pid);
-  if (now) return killAll(pids, 'SIGKILL');
+  if (now || process.platform === 'win32') killTree(term.pid);
+  const pids = now || process.platform === 'win32' ? [] : processTree(term.pid);
   try {
     term.kill();
   } catch {
     // already gone
   }
   // Not unref'd: the sweep has to happen even if the server is on its way out.
-  setTimeout(() => killAll(pids, 'SIGKILL'), KILL_GRACE_MS);
+  if (pids.length) setTimeout(() => killAll(pids), KILL_GRACE_MS);
 }
 
 export function destroySession(session: Session, now = false): void {

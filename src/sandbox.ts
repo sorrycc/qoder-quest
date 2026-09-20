@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { killAll, pidsMentioning, processTree } from './proc.ts';
+import { killTree, pidsMentioning } from './proc.ts';
 import { TASKS_DIR } from './tasks.ts';
 import { removeTranscript } from './transcript.ts';
 
@@ -18,7 +18,9 @@ export function createSandbox(taskId: string, sessionId: string): string {
 
 export function removeSandbox(dir: string): void {
   if (!dir.startsWith(SANDBOX_ROOT + path.sep)) return;
-  fs.rmSync(dir, { recursive: true, force: true });
+  // qodercli needs a few seconds to exit, and Windows won't delete a directory that is still some process's
+  // working directory (EBUSY) or a file that is still open (EPERM). Keep trying in the background.
+  void fs.promises.rm(dir, { recursive: true, force: true, maxRetries: 30, retryDelay: 500 }).catch(() => undefined);
   removeTranscript(dir);
 }
 
@@ -26,7 +28,7 @@ export function removeSandbox(dir: string): void {
 export function wipeSandboxes(): void {
   // A server that was kill -9'd never got to stop its qodercli processes. They are found by the sandbox path
   // in their arguments, never by name: the booth machine may be running other qodercli sessions.
-  killAll(pidsMentioning(SANDBOX_ROOT + path.sep).flatMap(processTree), 'SIGKILL');
-  fs.rmSync(SANDBOX_ROOT, { recursive: true, force: true });
+  pidsMentioning(SANDBOX_ROOT + path.sep).forEach(killTree);
+  fs.rmSync(SANDBOX_ROOT, { recursive: true, force: true, maxRetries: 10, retryDelay: 300 });
   fs.mkdirSync(SANDBOX_ROOT, { recursive: true });
 }

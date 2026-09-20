@@ -4,6 +4,7 @@ import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
 import { Hono } from 'hono';
 import { WebSocketServer } from 'ws';
+import { authed, loginCookie, logoutCookie, passwordOk } from './auth.ts';
 import { runChecks } from './checks.ts';
 import { pidsMentioning } from './proc.ts';
 import { SANDBOX_ROOT, wipeSandboxes } from './sandbox.ts';
@@ -31,6 +32,37 @@ const MIME: Record<string, string> = {
 };
 
 const app = new Hono();
+
+// The site is on the public internet and every session is a shell on this machine, so everything
+// past the login page needs the admin password. The page itself (static files) stays open.
+app.get('/api/auth', (c) => c.json({ authed: authed(c.req.header('cookie')) }));
+
+// Wrong guesses queue up behind each other, one a second across all clients, so a short password
+// can't be brute-forced by guessing in parallel. A correct password never waits.
+let failures: Promise<unknown> = Promise.resolve();
+
+app.post('/api/login', async (c) => {
+  const { password } = await c.req.json<{ password?: string }>().catch(() => ({ password: undefined }));
+  if (!passwordOk(password)) {
+    await (failures = failures.then(() => new Promise((resolve) => setTimeout(resolve, 1000))));
+    return c.json({ error: 'wrong_password' }, 401);
+  }
+  const secure = c.req.header('x-forwarded-proto') === 'https' || new URL(c.req.url).protocol === 'https:';
+  return c.body(null, 204, { 'set-cookie': loginCookie(secure) });
+});
+
+app.post('/api/logout', (c) => c.body(null, 204, { 'set-cookie': logoutCookie }));
+
+// For whoever minds the booth: how many visitors are mid-level, and how many qodercli trees exist for them.
+// Only two counts, and it is what a monitor curls, so it stays open too.
+app.get('/api/health', (c) => c.json({ sessions: sessionCount(), processes: pidsMentioning(SANDBOX_ROOT + path.sep).length }));
+
+for (const guarded of ['/api/*', '/preview/*']) {
+  app.use(guarded, async (c, next) => {
+    if (!authed(c.req.header('cookie'))) return c.json({ error: 'unauthorized' }, 401);
+    await next();
+  });
+}
 
 // Re-read on every request so a task can be edited on the booth without a restart.
 app.get('/api/tasks', (c) => c.json(loadTasks()));
@@ -97,9 +129,6 @@ app.post('/api/sessions/:id/check', async (c) => {
   return c.json({ results, done: results.every((r) => r.ok) });
 });
 
-// For whoever minds the booth: how many visitors are mid-level, and how many qodercli trees exist for them.
-app.get('/api/health', (c) => c.json({ sessions: sessionCount(), processes: pidsMentioning(SANDBOX_ROOT + path.sep).length }));
-
 // What the visitor built, served straight out of their sandbox.
 app.get('/preview/:id/*', (c) => {
   const session = getSession(c.req.param('id'));
@@ -150,7 +179,7 @@ const wss = new WebSocketServer({ noServer: true });
 server.on('upgrade', (req, socket, head) => {
   const url = new URL(req.url ?? '', 'http://localhost');
   const session = url.pathname === '/ws' ? getSession(url.searchParams.get('session') ?? '') : undefined;
-  if (!session) {
+  if (!session || !authed(req.headers.cookie)) {
     socket.destroy();
     return;
   }

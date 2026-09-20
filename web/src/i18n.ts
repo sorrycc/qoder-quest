@@ -55,6 +55,10 @@ const DICT = {
   next: { zh: '去挑下一关', en: 'Pick the next level' },
   keepPlaying: { zh: '再玩一会', en: 'Keep playing' },
   allCleared: { zh: '三个难度全部通关，去找工作人员领奖', en: 'All three tiers cleared. Go claim your prize at the desk' },
+  loginHint: { zh: '输入管理员密码开始', en: 'Enter the admin password to start' },
+  password: { zh: '管理员密码', en: 'Admin password' },
+  login: { zh: '进入', en: 'Enter' },
+  wrongPassword: { zh: '密码不对', en: 'Wrong password' },
 } satisfies Record<string, L>;
 
 export type Key = keyof typeof DICT;

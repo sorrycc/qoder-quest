@@ -42,3 +42,19 @@ export function endSession(id: string): void {
   // keepalive lets the request outlive the page when the tab is closing.
   void fetch(`/api/sessions/${id}/end`, { method: 'DELETE', keepalive: true }).catch(() => undefined);
 }
+
+export async function fetchAuthed(): Promise<boolean> {
+  const res = await fetch('/api/auth');
+  if (!res.ok) throw new Error(`auth ${res.status}`);
+  return (await res.json()).authed;
+}
+
+export async function login(password: string): Promise<boolean> {
+  const res = await fetch('/api/login', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ password }),
+  });
+  if (!res.ok && res.status !== 401) throw new Error(`login ${res.status}`);
+  return res.ok;
+}

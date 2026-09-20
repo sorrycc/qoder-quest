@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import type { Lang, TaskDef } from '../../src/types.ts';
-import { fetchTasks } from './api.ts';
+import { fetchAuthed, fetchTasks } from './api.ts';
 import { LangContext, loadLang, saveLang } from './i18n.ts';
+import { LoginPage } from './pages/Login.tsx';
 import { MapPage } from './pages/Map.tsx';
 import { PlayPage } from './pages/Play.tsx';
 import { SettingsPage } from './pages/Settings.tsx';
@@ -13,11 +14,17 @@ export function App() {
   const [taskId, setTaskId] = useState<string | null>(null);
   const [progress, setProgress] = useState<Progress>(loadProgress);
   const [inSettings, setInSettings] = useState(false);
+  // null until the server says whether this browser already carries the login cookie.
+  const [authed, setAuthed] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    void fetchAuthed().then(setAuthed);
+  }, []);
 
   // Again on the way back from settings: the map may have changed.
   useEffect(() => {
-    if (!inSettings) void fetchTasks().then(setTasks);
-  }, [inSettings]);
+    if (authed && !inSettings) void fetchTasks().then(setTasks);
+  }, [authed, inSettings]);
 
   useEffect(() => {
     saveLang(lang);
@@ -37,7 +44,9 @@ export function App() {
 
   return (
     <LangContext value={lang}>
-      {task ? (
+      {authed === null ? null : !authed ? (
+        <LoginPage onAuthed={() => setAuthed(true)} onToggleLang={toggleLang} />
+      ) : task ? (
         <PlayPage
           // A fresh sandbox and terminal per level.
           key={task.id}

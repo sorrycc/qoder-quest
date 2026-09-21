@@ -4,7 +4,8 @@
   "emoji": "🚀",
   "minutes": 10,
   "parMinutes": 8,
-  "preview": "index.html",
+  "preview": "**/index.html",
+  "showcase": "**/index.html",
   "title": {
     "zh": "Boss 战：一句话开公司",
     "en": "Boss Fight: A Company from One Sentence"
@@ -14,16 +15,16 @@
     "en": "Name, logo, landing page, promo. The investor arrives in 8 minutes"
   },
   "story": {
-    "zh": "电梯里偶遇投资人，你脱口而出一个点子，对方说：有意思，8 分钟后来我办公室聊。你现在什么都没有。",
-    "en": "You pitch an idea to an investor in a lift. Interesting, they say, come to my office in 8 minutes. You have nothing."
+    "zh": "电梯里偶遇投资人，你脱口而出一个点子（每次随机，不喜欢就在终端里改掉），对方说：有意思，8 分钟后来我办公室聊。你现在什么都没有。",
+    "en": "You blurt out an idea to an investor in a lift (a new one each time; edit it in the terminal if you don't like it). Interesting, they say, come to my office in 8 minutes. You have nothing."
   },
   "goal": {
-    "zh": "8 分钟内凑齐：一个 Logo、用上它的落地页 index.html、一段 VideoGen 生成的宣传片并嵌进落地页。除了开场那一句，怎么指挥 Qoder 你自己定。",
-    "en": "Within 8 minutes: a logo, a landing page index.html that uses it, and a VideoGen promo embedded in that page. Past the opening line, how you direct Qoder is up to you."
+    "zh": "8 分钟内凑齐：一个 Logo、用上它的落地页 index.html、一段 VideoGen 生成的宣传片并嵌进落地页。除了开场那一句，怎么指挥 Qoder 你自己定。通关后扫码就能把落地页带回家。",
+    "en": "Within 8 minutes: a logo, a landing page index.html that uses it, and a VideoGen promo embedded in that page. Past the opening line, how you direct Qoder is up to you. Clear it and a QR code lets you take the page home."
   },
   "openingPrompt": {
-    "zh": "我要开一家公司：给程序员喝的防脱发咖啡。先用内置的 VideoGen 工具提交一段 5 秒的宣传片：一杯冒着热气的咖啡放在机械键盘旁，镜头推近，电影感。提交完不要等它，马上告诉我，我们先干别的",
-    "en": "I'm starting a company: anti-hair-loss coffee for programmers. First use the built-in VideoGen tool to submit a 5 second promo: a steaming cup of coffee beside a mechanical keyboard, slow push-in, cinematic. Don't wait for it after submitting. Tell me right away and we'll get on with the rest"
+    "zh": "我要开一家公司：{idea}。先用内置的 VideoGen 工具提交一段 5 秒的宣传片：{shot}。提交完不要等它，马上告诉我，我们先干别的。先记住一条：后面的落地页只做纯前端，就一个 index.html 放在当前目录，CSS 和 JS 都写在里面，不要后端、不要框架、不要构建工具、不要装依赖",
+    "en": "I'm starting a company: {idea}. First use the built-in VideoGen tool to submit a 5 second promo: {shot}. Don't wait for it after submitting. Tell me right away and we'll get on with the rest. One rule to remember: the landing page later is frontend only, a single index.html in the current folder with its CSS and JS inline. No backend, no framework, no build tools, no dependencies"
   },
   "steps": [
     {
@@ -34,14 +35,14 @@
     },
     {
       "hint": {
-        "zh": "视频在后台跑的时候，自己打字指挥 Qoder：起名字、用 ImageGen 画一个 logo（图片名字用 logo）、做落地页 index.html 并用上这个 logo。",
-        "en": "While the video cooks, type your own orders: pick a name, have ImageGen draw a logo (name the image logo), build the landing page index.html around that logo."
+        "zh": "视频在后台跑的时候，自己打字指挥 Qoder：起名字、用 ImageGen 画一个 logo（图片名字用 logo）、做落地页 index.html 并用上这个 logo。落地页就一个纯前端的 HTML 文件，别让它搭后端。",
+        "en": "While the video cooks, type your own orders: pick a name, have ImageGen draw a logo (name the image logo), build the landing page index.html around that logo. The page is one frontend-only HTML file. Don't let it build a backend."
       }
     },
     {
       "hint": {
-        "zh": "视频好了 Qoder 会收到通知。让它把 mp4 放到落地页首屏，点「预览」验收。",
-        "en": "Qoder is notified when the video is ready. Have it put the mp4 at the top of the landing page, then check the Preview tab."
+        "zh": "视频好了 Qoder 会收到通知。小技巧：让它把 mp4 铺满首屏当背景（自动播放、静音、循环），上面叠一层半透明遮罩再放 Logo 和标题，质感立刻上一个档次。点「预览」验收。",
+        "en": "Qoder is notified when the video is ready. Tip: have it use the mp4 as a full-bleed hero background (autoplay, muted, loop) with a translucent overlay under the logo and headline. It lifts the whole page. Then check the Preview tab."
       }
     }
   ],
@@ -56,7 +57,7 @@
     },
     {
       "type": "fileContains",
-      "path": "index.html",
+      "path": "**/index.html",
       "pattern": "logo[\\w-]*\\.png",
       "label": {
         "zh": "落地页用上了 Logo（index.html）",
@@ -73,7 +74,7 @@
     },
     {
       "type": "fileContains",
-      "path": "index.html",
+      "path": "**/index.html",
       "pattern": "\\.mp4",
       "label": {
         "zh": "宣传片嵌进了落地页",
@@ -100,16 +101,16 @@
       "en": "Name, logo, landing page. The investor arrives in 6 minutes"
     },
     "story": {
-      "zh": "电梯里偶遇投资人，你脱口而出一个点子，对方说：有意思，6 分钟后来我办公室聊。你现在什么都没有。",
-      "en": "You pitch an idea to an investor in a lift. Interesting, they say, come to my office in 6 minutes. You have nothing."
+      "zh": "电梯里偶遇投资人，你脱口而出一个点子（每次随机，不喜欢就在终端里改掉），对方说：有意思，6 分钟后来我办公室聊。你现在什么都没有。",
+      "en": "You blurt out an idea to an investor in a lift (a new one each time; edit it in the terminal if you don't like it). Interesting, they say, come to my office in 6 minutes. You have nothing."
     },
     "goal": {
-      "zh": "6 分钟内凑齐：一个 Logo，以及用上它、首屏带动画的落地页 index.html。除了开场那一句，怎么指挥 Qoder 你自己定。",
-      "en": "Within 6 minutes: a logo and a landing page index.html that uses it and opens with an animated hero. Past the opening line, how you direct Qoder is up to you."
+      "zh": "6 分钟内凑齐：一个 Logo，以及用上它、首屏带动画的落地页 index.html。除了开场那一句，怎么指挥 Qoder 你自己定。通关后扫码就能把落地页带回家。",
+      "en": "Within 6 minutes: a logo and a landing page index.html that uses it and opens with an animated hero. Past the opening line, how you direct Qoder is up to you. Clear it and a QR code lets you take the page home."
     },
     "openingPrompt": {
-      "zh": "我要开一家公司：给程序员喝的防脱发咖啡。先帮我起三个公司名，每个配一句 slogan，让我挑",
-      "en": "I'm starting a company: anti-hair-loss coffee for programmers. Give me three company names, each with a slogan, and let me pick"
+      "zh": "我要开一家公司：{idea}。先帮我起三个公司名，每个配一句 slogan，让我挑。先记住一条：后面的落地页只做纯前端，就一个 index.html 放在当前目录，CSS 和 JS 都写在里面，不要后端、不要框架、不要构建工具、不要装依赖",
+      "en": "I'm starting a company: {idea}. Give me three company names, each with a slogan, and let me pick. One rule to remember: the landing page later is frontend only, a single index.html in the current folder with its CSS and JS inline. No backend, no framework, no build tools, no dependencies"
     },
     "steps": [
       {
@@ -136,7 +137,7 @@
       },
       {
         "type": "fileContains",
-        "path": "index.html",
+        "path": "**/index.html",
         "pattern": "logo[\\w-]*\\.png",
         "label": {
           "zh": "落地页用上了 Logo（index.html）",
@@ -145,7 +146,7 @@
       },
       {
         "type": "fileContains",
-        "path": "index.html",
+        "path": "**/index.html",
         "pattern": "@keyframes|animation",
         "flags": "i",
         "label": {

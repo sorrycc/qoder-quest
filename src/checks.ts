@@ -1,6 +1,7 @@
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { globNewest } from './glob.ts';
 import { killTree } from './proc.ts';
 import { readTranscript } from './transcript.ts';
 import type { Check, CheckResult } from './types.ts';
@@ -13,6 +14,11 @@ function read(cwd: string, rel: string): string | null {
   } catch {
     return null;
   }
+}
+
+/** Qoder doesn't always build where it was told to: a glob path reads every match. */
+function readAll(cwd: string, rel: string): string[] {
+  return (rel.includes('*') ? globNewest(cwd, rel) : [rel]).flatMap((f) => read(cwd, f) ?? []);
 }
 
 function runCommand(cwd: string, cmd: string, args: string[], timeoutMs: number): Promise<boolean> {
@@ -32,13 +38,11 @@ async function runOne(cwd: string, check: Check): Promise<boolean> {
   switch (check.type) {
     case 'fileExists':
       return fs.globSync(check.glob, { cwd }).length > 0;
-    case 'fileContains': {
-      const text = read(cwd, check.path);
-      return text !== null && new RegExp(check.pattern, check.flags).test(text);
-    }
+    case 'fileContains':
+      return readAll(cwd, check.path).some((text) => new RegExp(check.pattern, check.flags).test(text));
     case 'fileNotContains': {
-      const text = read(cwd, check.path);
-      return text !== null && !new RegExp(check.pattern, check.flags).test(text);
+      const texts = readAll(cwd, check.path);
+      return texts.length > 0 && texts.every((text) => !new RegExp(check.pattern, check.flags).test(text));
     }
     case 'transcriptContains':
       return new RegExp(check.pattern, check.flags).test(readTranscript(cwd));

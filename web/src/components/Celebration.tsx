@@ -1,8 +1,9 @@
 import confetti from 'canvas-confetti';
 import { useEffect } from 'react';
-import type { TaskDef } from '../../../src/types.ts';
+import type { ShowcaseRecord, TaskDef } from '../../../src/types.ts';
 import { useI18n } from '../i18n.ts';
 import { formatMs } from '../progress.ts';
+import { QrCode } from './QrCode.tsx';
 
 const COLORS = ['#2adb5c', '#b48cf2', '#f5c15c', '#e6e9e6'];
 
@@ -21,11 +22,13 @@ interface Props {
   task: TaskDef;
   ms: number;
   allCleared: boolean;
+  /** The page the visitor built, kept on the server. */
+  share?: ShowcaseRecord;
   onMap(): void;
   onStay(): void;
 }
 
-export function Celebration({ task, ms, allCleared, onMap, onStay }: Props) {
+export function Celebration({ task, ms, allCleared, share, onMap, onStay }: Props) {
   const { t, l } = useI18n();
 
   useEffect(() => {
@@ -45,6 +48,18 @@ export function Celebration({ task, ms, allCleared, onMap, onStay }: Props) {
           {t('clearedIn')} <span className="text-xl font-bold text-q-yellow">{formatMs(ms)}</span>
         </p>
         {bossLine && <p className="mt-1 text-sm text-q-purple">{bossLine}</p>}
+        {share && (
+          <div className="mt-5 flex items-center gap-4 rounded-xl border border-q-purple/40 bg-q-purple/5 p-3 text-left">
+            <QrCode text={share.url} className="w-28 shrink-0 rounded-md" />
+            <div className="min-w-0">
+              <p className="font-bold text-q-purple">{t('takeHome')}</p>
+              <p className="mt-1 text-xs text-dim">{t('takeHomeHint')}</p>
+              <a href={share.url} target="_blank" rel="noreferrer" className="mt-1 block break-all text-xs text-dim underline-offset-4 hover:text-fg hover:underline">
+                {share.url}
+              </a>
+            </div>
+          </div>
+        )}
         {allCleared && <p className="mt-4 rounded-lg bg-q-green/10 p-3 text-sm text-q-green">{t('allCleared')}</p>}
         <div className="mt-6 flex flex-col gap-2">
           {/* The next tier is the visitor's pick, so the way forward is the map. */}

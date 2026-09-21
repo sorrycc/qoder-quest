@@ -6,6 +6,7 @@ import { LoginPage } from './pages/Login.tsx';
 import { MapPage } from './pages/Map.tsx';
 import { PlayPage } from './pages/Play.tsx';
 import { SettingsPage } from './pages/Settings.tsx';
+import { ShowcasePage } from './pages/Showcase.tsx';
 import { clearedTiers, loadProgress, saveProgress, type Progress } from './progress.ts';
 
 export function App() {
@@ -14,6 +15,7 @@ export function App() {
   const [taskId, setTaskId] = useState<string | null>(null);
   const [progress, setProgress] = useState<Progress>(loadProgress);
   const [inSettings, setInSettings] = useState(false);
+  const [inShowcase, setInShowcase] = useState(false);
   // null until the server says whether this browser already carries the login cookie.
   const [authed, setAuthed] = useState<boolean | null>(null);
 
@@ -63,6 +65,8 @@ export function App() {
         />
       ) : inSettings ? (
         <SettingsPage onBack={() => setInSettings(false)} onToggleLang={toggleLang} />
+      ) : inShowcase ? (
+        <ShowcasePage onBack={() => setInShowcase(false)} onToggleLang={toggleLang} />
       ) : (
         <MapPage
           tasks={tasks}
@@ -70,6 +74,7 @@ export function App() {
           onPick={setTaskId}
           onReset={() => updateProgress({})}
           onSettings={() => setInSettings(true)}
+          onShowcase={() => setInShowcase(true)}
           onToggleLang={toggleLang}
         />
       )}

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import type { CheckResult, TaskDef } from '../../../src/types.ts';
-import { checkSession, createSession, endSession } from '../api.ts';
+import type { CheckResult, ShowcaseRecord, TaskDef } from '../../../src/types.ts';
+import { checkSession, createSession, endSession, shareSession } from '../api.ts';
 import { Celebration } from '../components/Celebration.tsx';
+import { QrDialog } from '../components/QrCode.tsx';
 import { Terminal, type TerminalHandle } from '../components/Terminal.tsx';
 import { LangToggle, Stars } from '../components/ui.tsx';
 import { useI18n } from '../i18n.ts';
@@ -45,6 +46,8 @@ export function PlayPage({ task, tiersCleared, tiersTotal, onCleared, onOpen, on
   const [missed, setMissed] = useState(false);
   const [clearedMs, setClearedMs] = useState<number | null>(null);
   const [celebrating, setCelebrating] = useState(false);
+  const [share, setShare] = useState<ShowcaseRecord | undefined>();
+  const [qrOpen, setQrOpen] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const startedAt = useRef(Date.now());
   const terminal = useRef<TerminalHandle>(null);
@@ -91,6 +94,7 @@ export function PlayPage({ task, tiersCleared, tiersTotal, onCleared, onOpen, on
     try {
       const res = await checkSession(sessionId);
       setResults(res.results);
+      if (res.share) setShare(res.share);
       if (res.done) finish();
       else if (manual) setMissed(true);
     } catch {
@@ -140,6 +144,12 @@ export function PlayPage({ task, tiersCleared, tiersTotal, onCleared, onOpen, on
         <h1 className="font-bold text-fg">{l(task.title)}</h1>
         <Stars level={task.level} />
         <div className="ml-auto flex items-center gap-4">
+          {share && clearedMs !== null && !celebrating && (
+            // The celebration is where the QR code lives. This brings it back after "keep playing".
+            <button onClick={() => setCelebrating(true)} className="rounded-full border border-q-purple/60 px-3 py-1 text-sm text-q-purple hover:bg-q-purple/10">
+              {t('takeHomeButton')}
+            </button>
+          )}
           <div
             className={`text-lg font-bold tabular-nums ${overtime ? 'text-q-red' : par !== null ? 'text-q-purple' : 'text-dim'}`}
             title={overtime ? t('overtime') : undefined}
@@ -260,6 +270,11 @@ export function PlayPage({ task, tiersCleared, tiersTotal, onCleared, onOpen, on
                 ↻ {t('refresh')}
               </button>
             )}
+            {tab === 'preview' && share && (
+              <button onClick={() => setQrOpen(true)} className="px-2 text-q-purple hover:brightness-125">
+                📱 {t('previewQr')}
+              </button>
+            )}
             <button
               onClick={() => {
                 setExit(null);
@@ -302,17 +317,26 @@ export function PlayPage({ task, tiersCleared, tiersTotal, onCleared, onOpen, on
               )}
             </div>
             {tab === 'preview' && sessionId && task.preview && (
-              <Preview key={previewNonce} src={`/preview/${sessionId}/${task.preview}`} empty={t('previewEmpty')} />
+              <Preview
+                key={previewNonce}
+                src={`/preview/${sessionId}/${task.preview}`}
+                empty={t('previewEmpty')}
+                // The page exists, so it can already go home with the visitor, cleared or not.
+                onExists={() => task.showcase && !share && void shareSession(sessionId).then((record) => record && setShare(record))}
+              />
             )}
           </div>
         </main>
       </div>
+
+      {qrOpen && share && <QrDialog record={share} hint={t('previewQrHint')} onClose={() => setQrOpen(false)} />}
 
       {celebrating && clearedMs !== null && (
         <Celebration
           task={task}
           ms={clearedMs}
           allCleared={tiersCleared === tiersTotal}
+          share={share}
           onMap={() => onOpen(null)}
           onStay={() => setCelebrating(false)}
         />
@@ -321,11 +345,15 @@ export function PlayPage({ task, tiersCleared, tiersTotal, onCleared, onOpen, on
   );
 }
 
-function Preview({ src, empty }: { src: string; empty: string }) {
+function Preview({ src, empty, onExists }: { src: string; empty: string; onExists?(): void }) {
   const [exists, setExists] = useState<boolean | null>(null);
   useEffect(() => {
     let cancelled = false;
-    void fetch(src, { method: 'HEAD' }).then((res) => !cancelled && setExists(res.ok));
+    void fetch(src, { method: 'HEAD' }).then((res) => {
+      if (cancelled) return;
+      setExists(res.ok);
+      if (res.ok) onExists?.();
+    });
     return () => {
       cancelled = true;
     };

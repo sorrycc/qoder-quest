@@ -1,16 +1,19 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { serve } from '@hono/node-server';
 import { serveStatic } from '@hono/node-server/serve-static';
-import { Hono } from 'hono';
+import { Hono, type Context } from 'hono';
 import { WebSocketServer } from 'ws';
 import { authed, loginCookie, logoutCookie, passwordOk } from './auth.ts';
 import { runChecks } from './checks.ts';
+import { globNewest } from './glob.ts';
 import { pidsMentioning } from './proc.ts';
 import { SANDBOX_ROOT, wipeSandboxes } from './sandbox.ts';
-import { createSession, destroyAll, destroySession, getSession, sessionCount, startPty, stopPty } from './sessions.ts';
+import { listRecords, readMeta, recordSite, removeRecord, saveRecord, SHOWCASE_ROOT, type StoredRecord } from './showcase.ts';
+import { createSession, destroyAll, destroySession, getSession, sessionCount, sessionOfRecord, startPty, stopPty } from './sessions.ts';
 import { isEnabled, loadAllTasks, loadConfig, loadFeatures, loadTasks, saveConfig, videoPinned } from './tasks.ts';
-import type { ClientMsg, Lang, ServerMsg, Settings } from './types.ts';
+import type { CheckResponse, ClientMsg, Lang, ServerMsg, Settings, ShowcaseRecord } from './types.ts';
 
 const PORT = Number(process.env.PORT ?? 4318);
 const ORPHAN_GRACE_MS = 30_000;
@@ -65,7 +68,7 @@ for (const guarded of ['/api/*', '/preview/*']) {
 }
 
 // Re-read on every request so a task can be edited on the booth without a restart.
-app.get('/api/tasks', (c) => c.json(loadTasks()));
+app.get('/api/tasks', (c) => c.json(loadTasks().map(({ ideas: _ideas, ...task }) => task)));
 
 function settings(): Settings {
   const { levels } = loadConfig();
@@ -126,27 +129,59 @@ app.post('/api/sessions/:id/check', async (c) => {
     checking.set(session.id, run);
   }
   const results = await run;
-  return c.json({ results, done: results.every((r) => r.ok) });
+  const done = results.every((r) => r.ok);
+  const record = done ? saveRecord(session, true) : undefined;
+  return c.json<CheckResponse>({ results, done, share: record && withUrl(c, record) });
 });
 
-// What the visitor built, served straight out of their sandbox.
-app.get('/preview/:id/*', (c) => {
+// The preview tab asks for this as soon as there is a page, so the QR code doesn't have to wait for the level
+// to be cleared. The page is served out of the sandbox while the session lives, so one copy is enough to start with.
+app.post('/api/sessions/:id/share', (c) => {
   const session = getSession(c.req.param('id'));
-  if (!session) return c.text('session not found', 404);
-  let rel = decodeURIComponent(c.req.path.split('/').slice(3).join('/')) || 'index.html';
-  // ImageGen picks its own file names (vibe_images/<name>_<timestamp>.png), so a preview can be a glob: newest match wins.
-  if (rel.includes('*')) {
-    const mtime = (f: string) => fs.statSync(path.join(session.dir, f)).mtimeMs;
-    rel = fs.globSync(rel, { cwd: session.dir }).sort((a, b) => mtime(b) - mtime(a))[0] ?? rel;
-  }
-  const file = path.resolve(session.dir, rel);
-  if (!file.startsWith(session.dir + path.sep) || !fs.existsSync(file) || !fs.statSync(file).isFile()) {
+  if (!session) return c.json({ error: 'unknown_session' }, 404);
+  const record = (session.recordId && readMeta(SHOWCASE_ROOT, session.recordId)) || saveRecord(session, false);
+  return record ? c.json(withUrl(c, record)) : c.json({ error: 'no_page' }, 404);
+});
+
+/**
+ * The address a phone can reach this server at. PUBLIC_URL when the booth sits behind a proxy or a tunnel,
+ * otherwise whatever the browser used, with localhost swapped for this machine's address on the network.
+ */
+function publicOrigin(c: Context): string {
+  if (process.env.PUBLIC_URL) return process.env.PUBLIC_URL.replace(/\/+$/, '');
+  const url = new URL(c.req.url);
+  const proto = c.req.header('x-forwarded-proto') ?? url.protocol.slice(0, -1);
+  const host = c.req.header('x-forwarded-host') ?? c.req.header('host') ?? url.host;
+  // Private ranges only: a VPN or proxy tunnel also shows up as an interface, and no phone can reach that one.
+  const lan = Object.values(os.networkInterfaces())
+    .flat()
+    .find((a) => a && a.family === 'IPv4' && !a.internal && /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(a.address))?.address;
+  return `${proto}://${lan ? host.replace(/^(localhost|127\.0\.0\.1)(?=:|$)/, lan) : host}`;
+}
+
+const withUrl = (c: Context, record: StoredRecord): ShowcaseRecord => ({
+  ...record,
+  url: `${publicOrigin(c)}/p/${record.id}/${record.entry.split('/').map(encodeURIComponent).join('/')}`,
+});
+
+// Every page visitors made, newest first, for the booth to look through afterwards.
+app.get('/api/showcase', (c) => c.json(listRecords().map((record) => withUrl(c, record))));
+
+app.delete('/api/showcase/:id', (c) => {
+  removeRecord(c.req.param('id'));
+  return c.body(null, 204);
+});
+
+function serveFile(c: Context, root: string, rel: string, extra: Record<string, string> = {}) {
+  const file = path.resolve(root, rel);
+  if (!file.startsWith(root + path.sep) || !fs.existsSync(file) || !fs.statSync(file).isFile()) {
     return c.text('not found', 404);
   }
   const headers = {
-    'content-type': MIME[path.extname(file)] ?? 'application/octet-stream',
+    'content-type': MIME[path.extname(file).toLowerCase()] ?? 'application/octet-stream',
     'cache-control': 'no-store',
     'accept-ranges': 'bytes',
+    ...extra,
   };
   // Safari won't play a <video> unless byte ranges are honoured.
   const range = /^bytes=(\d*)-(\d*)$/.exec(c.req.header('range') ?? '');
@@ -162,6 +197,36 @@ app.get('/preview/:id/*', (c) => {
     return c.body(chunk, 206, { ...headers, 'content-range': `bytes ${start}-${end}/${size}` });
   }
   return c.body(fs.readFileSync(file), 200, headers);
+}
+
+const relPath = (c: Context, skip: number) => decodeURIComponent(c.req.path.split('/').slice(skip).join('/'));
+
+// A kept page, open to anyone holding its address: the phone that scans the QR code has no login cookie.
+// It is a stranger's HTML, so the browser is told to give it an origin of its own, away from the admin cookie.
+app.get('/p/:id/*', (c) => {
+  // While the visitor is still at it the sandbox is the page: what they changed a minute ago is what the phone
+  // shows. The copy takes over when the session ends, and is refreshed at that moment.
+  const id = c.req.param('id');
+  const site = recordSite(id) && (sessionOfRecord(id)?.dir ?? recordSite(id));
+  if (!site) return c.text('not found', 404);
+  return serveFile(c, site, relPath(c, 3) || 'index.html', {
+    'content-security-policy': 'sandbox allow-scripts allow-popups allow-forms',
+  });
+});
+
+// What the visitor built, served straight out of their sandbox.
+app.get('/preview/:id/*', (c) => {
+  const session = getSession(c.req.param('id'));
+  if (!session) return c.text('session not found', 404);
+  const rel = relPath(c, 3) || 'index.html';
+  // ImageGen picks its own file names (vibe_images/<name>_<timestamp>.png) and a page can land in web/ or
+  // elsewhere, so a preview can be a glob: newest match wins. Redirected, so the page's relative links still work.
+  if (rel.includes('*')) {
+    const found = globNewest(session.dir, rel)[0];
+    if (!found) return c.text('not found', 404);
+    return c.redirect(`/preview/${session.id}/${found.split('/').map(encodeURIComponent).join('/')}`);
+  }
+  return serveFile(c, session.dir, rel);
 });
 
 app.use('/*', serveStatic({ root: './dist' }));

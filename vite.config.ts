@@ -13,6 +13,8 @@ export default defineConfig({
     proxy: {
       '/api': SERVER,
       '/preview': SERVER,
+      // Kept pages. A regex, because a plain '/p' prefix would also catch any file of the app that starts with p.
+      '^/p/': SERVER,
       '/ws': { target: SERVER, ws: true },
     },
   },

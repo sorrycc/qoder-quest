@@ -11,6 +11,7 @@ interface Props {
   onPick(id: string): void;
   onReset(): void;
   onSettings(): void;
+  onShowcase(): void;
   onToggleLang(): void;
 }
 
@@ -47,6 +48,7 @@ function TaskCard({ task, index, cleared, optional, onPick }: { task: TaskDef; i
       </div>
       <h3 className="mt-3 text-lg font-bold text-fg">{l(task.title)}</h3>
       <p className="mt-1 min-h-10 text-sm text-dim">{l(task.tagline)}</p>
+      {task.showcase && <p className="mt-2 text-xs text-q-purple">{t('takeHomeCard')}</p>}
       <div className="mt-4 flex items-center gap-2 text-xs text-dim">
         <span>
           ~{task.minutes} {t('minutes')}
@@ -66,7 +68,7 @@ function TaskCard({ task, index, cleared, optional, onPick }: { task: TaskDef; i
   );
 }
 
-export function MapPage({ tasks, progress, onPick, onReset, onSettings, onToggleLang }: Props) {
+export function MapPage({ tasks, progress, onPick, onReset, onSettings, onShowcase, onToggleLang }: Props) {
   const { t } = useI18n();
   const logoClicks = useRef(0);
   const tiers = clearedTiers(tasks, progress);
@@ -149,6 +151,9 @@ export function MapPage({ tasks, progress, onPick, onReset, onSettings, onToggle
               {t('newVisitor')}
             </button>
           )}
+          <button onClick={onShowcase} className="underline-offset-4 hover:text-fg hover:underline">
+            🖼 {t('showcase')}
+          </button>
           {/* For booth staff. Deliberately quiet. */}
           <button onClick={onSettings} className="underline-offset-4 hover:text-fg hover:underline">
             ⚙ {t('settings')}

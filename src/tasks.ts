@@ -36,7 +36,12 @@ export function loadAllTasks(dir = TASKS_DIR): TaskDef[] {
   return fs
     .readdirSync(dir, { withFileTypes: true })
     .filter((e) => e.isDirectory() && fs.existsSync(path.join(dir, e.name, 'task.json')))
-    .map((e) => ({ ...JSON.parse(fs.readFileSync(path.join(dir, e.name, 'task.json'), 'utf8')), id: e.name }) as TaskDef)
+    .map((e) => {
+      const read = (file: string) => JSON.parse(fs.readFileSync(path.join(dir, e.name, file), 'utf8'));
+      // Hundreds of ideas would bury the level itself, so they get a file of their own.
+      const ideas = fs.existsSync(path.join(dir, e.name, 'ideas.json')) ? { ideas: read('ideas.json') } : {};
+      return { ...read('task.json'), ...ideas, id: e.name } as TaskDef;
+    })
     .sort((a, b) => a.order - b.order);
 }
 

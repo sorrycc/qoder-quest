@@ -4,10 +4,12 @@ import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { runChecks } from '../src/checks.ts';
 import { pidsMentioning } from '../src/proc.ts';
+import { drawIdea, fillPrompt } from '../src/sessions.ts';
+import { listRecords, recordSite, removeRecord, saveRecord } from '../src/showcase.ts';
 import { windowsCommand } from '../src/pty.ts';
 import { loadAllTasks, loadConfig, loadFeatures, loadTasks, saveConfig, TASKS_DIR } from '../src/tasks.ts';
 import { transcriptDir } from '../src/transcript.ts';
-import type { L } from '../src/types.ts';
+import type { L, TaskDef } from '../src/types.ts';
 
 // Archived levels can be switched back on from the settings page, so they are held to the same rules.
 const everyLevel = Object.fromEntries(loadAllTasks().map((t) => [t.id, true]));
@@ -63,6 +65,31 @@ describe('task definitions', () => {
   it.each(tasks)('$id prompts are single-line', (task) => {
     const prompts = [task.openingPrompt, ...task.steps.flatMap((s) => (s.prompt ? [s.prompt] : []))];
     expect(prompts.every((p) => !/[\r\n]/.test(p.zh + p.en))).toBe(true);
+  });
+
+  // One idea all day makes every visitor's page look the same.
+  it.each(tasks.filter((t) => t.ideas))('$id has plenty of ideas, each filling the whole opening prompt', (task) => {
+    expect(task.ideas!.length).toBeGreaterThanOrEqual(300);
+    expect(new Set(task.ideas!.map((i) => i.idea.zh)).size).toBe(task.ideas!.length);
+    for (const idea of task.ideas!) {
+      expect(Object.values(idea).every(bilingual)).toBe(true);
+      for (const lang of ['zh', 'en'] as const) {
+        const prompt = fillPrompt(task.openingPrompt[lang], idea, lang);
+        expect(prompt).not.toMatch(/[{}\r\n]/);
+        expect(prompt).toContain(idea.idea[lang]);
+      }
+    }
+  });
+
+  it('deals every idea once before any comes round again', () => {
+    const task = { id: 'deck-test', ideas: [1, 2, 3, 4, 5].map((n) => ({ idea: { zh: `${n}`, en: `${n}` } })) };
+    const round = () => task.ideas!.map(() => drawIdea(task)!.idea.zh).sort();
+    expect(round()).toEqual(['1', '2', '3', '4', '5']);
+    expect(round()).toEqual(['1', '2', '3', '4', '5']);
+  });
+
+  it.each(tasks.filter((t) => !t.ideas))('$id has no placeholder left to fill', (task) => {
+    expect(task.openingPrompt.zh + task.openingPrompt.en).not.toMatch(/\{\w+\}/);
   });
 
   it.each(tasks.filter((t) => t.checks?.length))('$id is not already cleared by its own template', async (task) => {
@@ -121,6 +148,21 @@ describe('runChecks', () => {
     expect(await ok({ type: 'fileNotContains', path: 'nope.txt', pattern: 'x', label })).toBe(false);
   });
 
+  it('a glob path finds the page wherever Qoder put it, but not in node_modules', async () => {
+    const check = { type: 'fileContains', path: '**/index.html', pattern: 'logo\\.png', label } as const;
+    expect(await ok(check)).toBe(false);
+    fs.mkdirSync(path.join(dir, 'node_modules/pkg'), { recursive: true });
+    fs.writeFileSync(path.join(dir, 'node_modules/pkg/index.html'), '<img src="logo.png">');
+    expect(await ok(check)).toBe(false);
+    fs.mkdirSync(path.join(dir, 'web'));
+    fs.writeFileSync(path.join(dir, 'web/index.html'), '<img src="logo.png">');
+    expect(await ok(check)).toBe(true);
+    fs.writeFileSync(path.join(dir, 'index.html'), '<h1>old</h1>');
+    expect(await ok(check)).toBe(true);
+    expect(await ok({ type: 'fileNotContains', path: '**/index.html', pattern: 'logo', label })).toBe(false);
+    expect(await ok({ type: 'fileNotContains', path: '**/index.html', pattern: 'claude', label })).toBe(true);
+  });
+
   it('refuses paths outside the sandbox', async () => {
     expect(await ok({ type: 'fileContains', path: '../../etc/hosts', pattern: '.', label })).toBe(false);
   });
@@ -151,6 +193,48 @@ describe('runChecks', () => {
   it('command passes on exit 0', async () => {
     expect(await ok({ type: 'command', cmd: 'node', args: ['-e', 'process.exit(0)'], label })).toBe(true);
     expect(await ok({ type: 'command', cmd: 'node', args: ['-e', 'process.exit(1)'], label })).toBe(false);
+  });
+});
+
+describe('showcase', () => {
+  let root: string;
+  let dir: string;
+  beforeEach(() => {
+    root = fs.mkdtempSync(path.join(os.tmpdir(), 'quest-showcase-'));
+    dir = fs.mkdtempSync(path.join(os.tmpdir(), 'quest-sandbox-'));
+  });
+  afterEach(() => [root, dir].forEach((d) => fs.rmSync(d, { recursive: true, force: true })));
+
+  const session = () => ({ task: { id: 'x', showcase: '**/index.html' } as TaskDef, lang: 'zh' as const, dir, idea: '猫的健身房', startedAt: Date.now() - 5000 });
+
+  it('keeps nothing until there is a page', () => {
+    expect(saveRecord(session(), false, root)).toBeUndefined();
+    expect(listRecords(root)).toEqual([]);
+  });
+
+  it('keeps the page from wherever it was built, and stays cleared once cleared', () => {
+    fs.mkdirSync(path.join(dir, 'web/node_modules/pkg'), { recursive: true });
+    fs.writeFileSync(path.join(dir, 'web/node_modules/pkg/big.js'), '');
+    fs.writeFileSync(path.join(dir, 'web/index.html'), 'v1');
+    fs.writeFileSync(path.join(dir, 'web/logo_1.png'), '');
+    const s = session();
+    const first = saveRecord(s, true, root)!;
+    expect(first).toMatchObject({ entry: 'web/index.html', logo: 'web/logo_1.png', cleared: true, idea: '猫的健身房' });
+    const site = recordSite(first.id, root)!;
+    expect(fs.readFileSync(path.join(site, 'web/index.html'), 'utf8')).toBe('v1');
+    expect(fs.existsSync(path.join(site, 'web/node_modules'))).toBe(false);
+
+    // The visitor keeps polishing, then leaves: same record, newer page, still cleared with the same time.
+    fs.writeFileSync(path.join(dir, 'web/index.html'), 'v2');
+    const second = saveRecord(s, false, root)!;
+    expect(second).toMatchObject({ id: first.id, cleared: true, ms: first.ms, createdAt: first.createdAt });
+    expect(fs.readFileSync(path.join(site, 'web/index.html'), 'utf8')).toBe('v2');
+    expect(listRecords(root)).toHaveLength(1);
+
+    removeRecord(first.id, root);
+    expect(listRecords(root)).toEqual([]);
+    expect(recordSite(first.id, root)).toBeUndefined();
+    expect(recordSite('../etc', root)).toBeUndefined();
   });
 });
 

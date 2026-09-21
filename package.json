@@ -26,6 +26,7 @@
     "canvas-confetti": "^1.9.4",
     "hono": "^4.13.8",
     "node-pty": "^1.1.0",
+    "qrcode-generator": "^2.0.4",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "ws": "^8.21.3"

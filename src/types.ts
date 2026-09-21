@@ -5,7 +5,9 @@ export type L = Record<Lang, string>;
 
 export type Check = { label: L } & (
   | { type: 'fileExists'; glob: string }
+  /** path may be a glob (Qoder sometimes builds the page in web/ or another folder): any match containing the pattern passes. */
   | { type: 'fileContains'; path: string; pattern: string; flags?: string }
+  /** With a glob, every match has to be free of the pattern. */
   | { type: 'fileNotContains'; path: string; pattern: string; flags?: string }
   | { type: 'command'; cmd: string; args: string[]; timeoutMs?: number }
   /** Matches against qodercli's own record of the conversation, e.g. to see that a slash command really ran. */
@@ -17,6 +19,9 @@ export interface Step {
   /** Suggested prompt. Clicking it types the text into the terminal without sending. */
   prompt?: L;
 }
+
+/** One thing a level can be about. Its fields fill the {placeholders} of the opening prompt. */
+export type Idea = Record<string, L>;
 
 /** Something the booth can switch off in quest.config.json when it is too slow on the day. */
 export type Feature = 'video';
@@ -38,7 +43,12 @@ export interface TaskDef {
   tagline: L;
   story: L;
   goal: L;
+  /** May hold {placeholders}, filled from one of the ideas when the level starts. */
   openingPrompt: L;
+  /** Drawn at random per visitor, so the booth doesn't see the same result all day. Kept in ideas.json next to task.json, and never sent to the browser. */
+  ideas?: Idea[];
+  /** Sandbox file that is kept as a take-home page with a QR code. A glob keeps its newest match. */
+  showcase?: string;
   steps: Step[];
   /** All must pass. Tasks without checks are finished by hand. */
   checks?: Check[];
@@ -67,6 +77,31 @@ export interface Settings {
     /** Disappears from the map while video is off. */
     needsVideo: boolean;
   })[];
+}
+
+/** A visitor's page, kept after the sandbox is gone. */
+export interface ShowcaseRecord {
+  id: string;
+  taskId: string;
+  lang: Lang;
+  /** The idea the visitor drew, in their language. */
+  idea?: string;
+  /** Where the page sits inside the record, e.g. index.html or web/index.html. */
+  entry: string;
+  /** Newest logo image, for the wall's thumbnail. */
+  logo?: string;
+  cleared: boolean;
+  ms: number;
+  createdAt: number;
+  /** Public address, the one behind the QR code. Filled in per request. */
+  url: string;
+}
+
+export interface CheckResponse {
+  results: CheckResult[];
+  done: boolean;
+  /** The take-home page, once the level is cleared. */
+  share?: ShowcaseRecord;
 }
 
 export interface CheckResult {

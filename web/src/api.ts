@@ -1,4 +1,4 @@
-import type { CheckResult, Lang, Settings, TaskDef } from '../../src/types.ts';
+import type { CheckResponse, Lang, Settings, ShowcaseRecord, TaskDef } from '../../src/types.ts';
 
 export async function fetchTasks(): Promise<TaskDef[]> {
   const res = await fetch('/api/tasks');
@@ -32,10 +32,27 @@ export async function createSession(taskId: string, lang: Lang): Promise<string>
   return (await res.json()).id;
 }
 
-export async function checkSession(id: string): Promise<{ results: CheckResult[]; done: boolean }> {
+export async function checkSession(id: string): Promise<CheckResponse> {
   const res = await fetch(`/api/sessions/${id}/check`, { method: 'POST' });
   if (!res.ok) throw new Error(`check ${res.status}`);
   return res.json();
+}
+
+/** The take-home page of a level still being played. Nothing until the page exists. */
+export async function shareSession(id: string): Promise<ShowcaseRecord | undefined> {
+  const res = await fetch(`/api/sessions/${id}/share`, { method: 'POST' });
+  return res.ok ? res.json() : undefined;
+}
+
+export async function fetchShowcase(): Promise<ShowcaseRecord[]> {
+  const res = await fetch('/api/showcase');
+  if (!res.ok) throw new Error(`showcase ${res.status}`);
+  return res.json();
+}
+
+export async function deleteShowcase(id: string): Promise<void> {
+  const res = await fetch(`/api/showcase/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error(`showcase ${res.status}`);
 }
 
 export function endSession(id: string): void {

@@ -3,8 +3,9 @@ import type { IPty } from 'node-pty';
 import { killAll, killTree, processTree } from './proc.ts';
 import { spawnQoder } from './pty.ts';
 import { createSandbox, removeSandbox } from './sandbox.ts';
+import { saveRecord } from './showcase.ts';
 import { readTranscript } from './transcript.ts';
-import type { Lang, TaskDef } from './types.ts';
+import type { Idea, Lang, TaskDef } from './types.ts';
 
 const IDLE_MS = 20 * 60_000;
 const READY_FALLBACK_MS = 10_000;
@@ -16,6 +17,12 @@ export interface Session {
   task: TaskDef;
   lang: Lang;
   dir: string;
+  /** The opening prompt with this visitor's idea filled in. */
+  openingPrompt: string;
+  idea?: string;
+  startedAt: number;
+  /** Set once the page has been kept for the showcase. */
+  recordId?: string;
   pty?: IPty;
   lastActive: number;
   onDestroy?: () => void;
@@ -23,15 +30,54 @@ export interface Session {
 
 const sessions = new Map<string, Session>();
 
+/** Replaces each {field} with the idea's text. A field the idea doesn't have is left as written. */
+export function fillPrompt(prompt: string, idea: Idea | undefined, lang: Lang): string {
+  return prompt.replace(/\{(\w+)\}/g, (whole, field: string) => idea?.[field]?.[lang] ?? whole);
+}
+
+// A shuffled deck per level rather than a fresh roll each time: two visitors in a row never get the same
+// idea, and the booth sees all of them before any comes round again.
+const decks = new Map<string, Idea[]>();
+
+export function drawIdea(task: Pick<TaskDef, 'id' | 'ideas'>): Idea | undefined {
+  if (!task.ideas?.length) return undefined;
+  let deck = decks.get(task.id) ?? [];
+  if (deck.length === 0) {
+    deck = [...task.ideas];
+    for (let i = deck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+  }
+  const idea = deck.pop();
+  decks.set(task.id, deck);
+  return idea;
+}
+
 export function createSession(task: TaskDef, lang: Lang): Session {
   const id = randomUUID().slice(0, 8);
-  const session: Session = { id, task, lang, dir: createSandbox(task.id, id), lastActive: Date.now() };
+  const idea = drawIdea(task);
+  const session: Session = {
+    id,
+    task,
+    lang,
+    dir: createSandbox(task.id, id),
+    openingPrompt: fillPrompt(task.openingPrompt[lang], idea, lang),
+    idea: idea?.idea?.[lang],
+    startedAt: Date.now(),
+    lastActive: Date.now(),
+  };
   sessions.set(id, session);
   return session;
 }
 
 export function getSession(id: string): Session | undefined {
   return sessions.get(id);
+}
+
+/** The session still working on a kept page, if its visitor hasn't left yet. */
+export function sessionOfRecord(recordId: string): Session | undefined {
+  return [...sessions.values()].find((s) => s.recordId === recordId);
 }
 
 // The TUI positions its text with cursor moves, so the input box's placeholder arrives without its spaces.
@@ -66,7 +112,7 @@ export function startPty(session: Session, cols: number, rows: number, onPrompte
   const resume = readTranscript(session.dir) !== '';
   const term = spawnQoder({ cwd: session.dir, resume, cols, rows });
   session.pty = term;
-  if (!resume) typeWhenReady(term, session.task.openingPrompt[session.lang], onPrompted);
+  if (!resume) typeWhenReady(term, session.openingPrompt, onPrompted);
   return term;
 }
 
@@ -96,6 +142,8 @@ export function stopPty(session: Session, now = false): void {
 export function destroySession(session: Session, now = false): void {
   if (!sessions.delete(session.id)) return;
   stopPty(session, now);
+  // Before the sandbox goes: the last state of the page, cleared or not.
+  saveRecord(session, false);
   removeSandbox(session.dir);
   session.onDestroy?.();
 }
